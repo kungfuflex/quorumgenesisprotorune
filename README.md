@@ -17,55 +17,41 @@ message ProposalId {
 }
 ```
 
-A protomessage for QUORUM•GENESIS•PROTORUNE is of the standard structure:
+The calldata sent with a protomessage for QUORUM•GENESIS•PROTORUNE is encoded as a `leb128[]`. Each individual field in these structures are encoded as leb128 and decoded in the order defined here, where `QuorumField` corresponds to the Tag value for the Runestone data structure being recursively encoded.
 
 ```proto
-message ProtoMessage {
-  bytes calldata = 1;
-  Predicate predicate = 2;
-  uint32 pointer = 3;
-  uint32 refund_pointer = 4;
+enum QuorumField {
+  PROPOSAL = 95;
+  VOTE = 97;
 }
-```
 
-All messages have no variability in their outputs or settlement risk so a predicate can be an empty set.
-
-Calldata for a ProtoMessage is of the structure:
-
-```proto
-message QuorumProtoMessage {
-  oneof data {
-    Proposal proposal = 1;
-    Vote vote = 2;
-  }
-}
-```
-
-The substructures are defined later in this section.
-
-Anyone with at least 10,000 QUORUM•GENESIS•PROTORUNE can create a proposal. To create the proposal, a protorune RunestoneMessage edict should spend QUORUM•GENESIS•PROTORUNE as well as a text based inscription reveal beginning with the text "QUORUM•GENESIS•PROTORUNE Proposal:\n" to a protomessage with calldata of the oneof structure being:
-
-```proto
-message Proposal {
-  uint64 quorumHeight = 1;
+message ProposalPayload {
+  ProposalId header = 1;
   uint64 quorumWeight = 2;
-  repeated string choices = 3;
-  uint32 voteIndex = 4;
+  uint64 quorumHeight = 3;
 }
-```
 
-To vote on a proposal, spend QUORUM•GENESIS•PROTORUNE to a protomessage of the form:
-
-```proto
 message Vote {
   ProposalId proposal = 1;
   uint32 voteIndex = 2;
 }
+
 ```
 
-The pointer in the protomessage points to the output which will hoold vote protorunes which are created 1:1 for the amount of QUORUM•GENESIS•PROTORUNE spent. The refund_pointer will contain the input QUORUM•GENESIS•PROTORUNE spent to the protomessage.
+All messages have no variability in their outputs or settlement risk so we do not use a predicate.
 
-Vote tokens can be transferred as part of a ProtoRunestoneMessage where the u128 for what would normally represent the txindex actually will store the two u32 values concatenated { txindex, voteIndex } to a u64 value then packed with leb128 as usual.
+Anyone with at least 10,000 QUORUM•GENESIS•PROTORUNE can create a proposal. To create the proposal, a protorune RunestoneMessage edict should spend QUORUM•GENESIS•PROTORUNE as well as a text based inscription reveal beginning with the text "QUORUM•GENESIS•PROTORUNE Proposal:\n" to a protomessage with calldata set to a Runestone encoded structure defined below:
+
+```rs
+struct QuorumRunestone {
+  [Proposal (95)]: ProposalPayload;
+  [Vote (97)]: u32;
+}
+```
+
+The pointer in the protomessage points to the output which will hold vote protorunes which are created 1:1 for the amount of QUORUM•GENESIS•PROTORUNE spent. The refund_pointer will contain the input QUORUM•GENESIS•PROTORUNE spent to the protomessage.
+
+Vote tokens can be transferred as part of a Protostone where the u128 for what would normally represent the txindex actually will store the two u32 values concatenated { txindex, voteIndex } to a u64 value then packed with leb128 as usual.
 
 Proposals are considered to have reached quorum and execute when the total supply of vote tokens >= quorumWeight OR the block height reaches quorumHeight. The resolution of a proposal is measured in terms of the total supply of the vote token for each possible voteIndex in choices.
 

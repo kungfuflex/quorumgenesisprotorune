@@ -4,12 +4,9 @@
   "scripts": {
     "asbuild:debug": "asc assembly/index.ts --target debug --enable threads --config asconfig.json",
     "asbuild:release": "asc assembly/index.ts --target release --config asconfig.json",
-    "build": "npm-run-all build:protoc asbuild:debug asbuild:release build:ts",
+    "build": "npm-run-all asbuild:debug asbuild:release",
     "build:debug:preloader": "npm run asbuild:preloader --sharedMemory",
     "build:ts": "tsc",
-    "build:protoc:as": "protoc --plugin=./node_modules/.bin/protoc-gen-as --as_out=assembly/proto --as_opt targetFileName=quorum.ts --proto_path=./ proto/quorum.proto",
-    "build:protoc:ts": "protoc --ts_out src.ts/proto --proto_path proto quorum.proto",
-    "build:protoc": "npm-run-all build:protoc:as build:protoc:ts",
     "prettier:assemblyscript": "prettier --write ./assembly/**/*.ts",
     "prettier:ts": "prettier --write ./src.ts/**/*.ts",
     "prettier": "npm-run-all prettier:assemblyscript",
@@ -18,12 +15,10 @@
     "test:release": "ts-mocha --timeout 0 ./tests/release.spec.ts"
   },
   "dependencies": {
-    "@protobuf-ts/runtime": "^2.9.4"
-  },
-  "devDependencies": {
     "@bitauth/libauth": "^3.0.0",
     "@magiceden-oss/runestone-lib": "^1.0.2",
     "@protobuf-ts/protoc": "^2.9.4",
+    "@protobuf-ts/runtime": "^2.9.4",
     "@types/mocha": "^10.0.6",
     "@types/node": "^20.10.6",
     "as-bignum": "^0.3.0",
@@ -33,6 +28,7 @@
     "fs-extra": "^11.2.0",
     "js-sha3": "^0.9.3",
     "metashrew-as": "https://github.com/sandshrewmetaprotocols/metashrew-as",
+    "metashrew-runes": "https://github.com/sandshrewmetaprotocols/metashrew-runes",
     "metashrew-spendables": "https://github.com/sandshrewmetaprotocols/metashrew-spendables",
     "metashrew-test": "https://github.com/sandshrewmetaprotocols/metashrew-test",
     "mocha": "^10.3.0",
@@ -40,10 +36,12 @@
     "npm-run-all": "^4.1.5",
     "prettier": "^3.1.1",
     "protobuf-as": "https://github.com/sandshrewmetaprotocols/protobuf-as",
+    "protorune": "https://github.com/kungfuflex/protorune",
     "rlp": "^3.0.0",
     "ts-mocha": "^10.0.0",
     "typescript": "^5.3.3"
   },
-  "name": "protorune",
-  "description": "protorune"
+  "devDependencies": {},
+  "name": "quorumgenesisprotorune",
+  "description": "Governance subprotocol definitions"
 }
