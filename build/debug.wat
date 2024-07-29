@@ -145,13 +145,13 @@
  (global $~lib/metashrew-spendables/assembly/tables/OUTPOINTS_FOR_ADDRESS (mut i32) (i32.const 0))
  (global $~lib/metashrew-spendables/assembly/tables/OUTPOINT_SPENDABLE_BY (mut i32) (i32.const 0))
  (global $~lib/metashrew-spendables/assembly/tables/OUTPOINT_TO_OUTPUT (mut i32) (i32.const 0))
+ (global $assembly/constants/QUORUM_GENESIS_PROTORUNE_HEIGHT i64 (i64.const 849236))
+ (global $assembly/constants/QUORUM_GENESIS_PROTORUNE_TXINDEX i32 (i32.const 298))
+ (global $assembly/tables/PROPOSALS (mut i32) (i32.const 0))
  (global $~lib/metashrew-runes/assembly/proto/metashrew-runes/__proto.MAX_POS i32 (i32.const 4096))
  (global $~lib/protorune/assembly/proto/protorune/__proto.MAX_POS i32 (i32.const 4096))
- (global $assembly/index/QUORUM_GENESIS_PROTORUNE_HEIGHT i32 (i32.const 849236))
- (global $assembly/index/QUORUM_GENESIS_PROTORUNE_TXINDEX i32 (i32.const 298))
  (global $assembly/index/QuorumField.PROPOSAL (mut i64) (i64.const 95))
  (global $assembly/index/QuorumField.VOTE (mut i64) (i64.const 97))
- (global $assembly/index/PROPOSALS (mut i32) (i32.const 0))
  (global $assembly/index/QuorumMessageContext.PROPOSAL_PREFIX (mut i32) (i32.const 0))
  (global $~lib/builtins/usize.MAX_VALUE i32 (i32.const -1))
  (global $~lib/native/ASC_OPTIMIZE_LEVEL i32 (i32.const 0))
@@ -2593,6 +2593,11 @@
  (func $start:~lib/metashrew-spendables/assembly/indexer
   call $start:~lib/metashrew-spendables/assembly/tables
  )
+ (func $start:assembly/tables
+  i32.const 4240
+  call $~lib/metashrew-as/assembly/indexer/tables/IndexPointer.for
+  global.set $assembly/tables/PROPOSALS
+ )
  (func $~lib/string/String#substring (param $this i32) (param $start i32) (param $end i32) (result i32)
   (local $len i32)
   (local $4 i32)
@@ -3158,9 +3163,7 @@
   call $start:~lib/metashrew-as/assembly/blockdata/block
   call $start:~lib/protorune/assembly/indexer/index
   call $start:~lib/metashrew-spendables/assembly/indexer
-  i32.const 4240
-  call $~lib/metashrew-as/assembly/indexer/tables/IndexPointer.for
-  global.set $assembly/index/PROPOSALS
+  call $start:assembly/tables
   i32.const 4288
   call $~lib/metashrew-as/assembly/index/decodeHex
   global.set $assembly/index/QuorumMessageContext.PROPOSAL_PREFIX
@@ -38130,14 +38133,13 @@
   local.get $rune
   call $~lib/protorune/assembly/indexer/protomessage/IncomingRune/IncomingRune#get:runeId
   call $~lib/metashrew-runes/assembly/indexer/RuneId/RuneId#get:block
-  global.get $assembly/index/QUORUM_GENESIS_PROTORUNE_HEIGHT
-  i64.extend_i32_s
+  global.get $assembly/constants/QUORUM_GENESIS_PROTORUNE_HEIGHT
   i64.eq
   if (result i32)
    local.get $rune
    call $~lib/protorune/assembly/indexer/protomessage/IncomingRune/IncomingRune#get:runeId
    call $~lib/metashrew-runes/assembly/indexer/RuneId/RuneId#get:tx
-   global.get $assembly/index/QUORUM_GENESIS_PROTORUNE_TXINDEX
+   global.get $assembly/constants/QUORUM_GENESIS_PROTORUNE_TXINDEX
    i32.eq
   else
    i32.const 0
@@ -40097,7 +40099,7 @@
    local.get $payload
    local.get $proposal
    call $assembly/index/Proposal.from
-   global.get $assembly/index/PROPOSALS
+   global.get $assembly/tables/PROPOSALS
    call $assembly/index/Proposal#save
   else
    local.get $action

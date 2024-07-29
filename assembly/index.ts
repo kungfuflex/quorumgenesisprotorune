@@ -18,10 +18,16 @@ import { Index as SpendablesIndex } from "metashrew-spendables/assembly/indexer"
 import { MessageContext } from "protorune/assembly/indexer/protomessage/MessageContext";
 import { IncomingRune } from "protorune/assembly/indexer/protomessage/IncomingRune";
 import { Inscription } from "metashrew-as/assembly/blockdata/inscription";
+import {
+  QUORUM_GENESIS_PROTORUNE_HEIGHT,
+  QUORUM_GENESIS_PROTORUNE_TXINDEX
+} from "./constants";
+import {
+  PROPOSALS
+} from "./tables";
 export * from "protorune/assembly/view";
+export * from "./view";
 
-const QUORUM_GENESIS_PROTORUNE_HEIGHT = 849236;
-const QUORUM_GENESIS_PROTORUNE_TXINDEX = 298;
 
 function isGenesisProtorune(rune: IncomingRune): boolean {
   if (rune.runeId.block === QUORUM_GENESIS_PROTORUNE_HEIGHT && rune.runeId.tx === QUORUM_GENESIS_PROTORUNE_TXINDEX) return true;
@@ -50,7 +56,6 @@ function findInscription(ins: Array<Input>): Inscription {
   return changetype<Inscription>(0);
 }
 
-const PROPOSALS = IndexPointer.for("/proposals/");
 
 class ProposalId {
   public height: u64;
