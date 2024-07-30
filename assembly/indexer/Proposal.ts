@@ -7,7 +7,12 @@ export class Proposal {
   public quorumHeight: u64;
   public quorumWeight: u64;
   public body: ArrayBuffer;
-  constructor(proposalId: ProposalId, quorumHeight: u64, quorumWeight: u64, body: ArrayBuffer) {
+  constructor(
+    proposalId: ProposalId,
+    quorumHeight: u64,
+    quorumWeight: u64,
+    body: ArrayBuffer,
+  ) {
     this.quorumHeight = quorumHeight;
     this.quorumWeight = quorumWeight;
     this.body = body;
@@ -17,7 +22,8 @@ export class Proposal {
   save(ptr: IndexPointer): void {
     const id = this.proposalId.serialize();
     const proposalPointer = ptr.select(id);
-    const exists = proposalPointer.keyword("/quorum-height").get().byteLength !== 0;
+    const exists =
+      proposalPointer.keyword("/quorum-height").get().byteLength !== 0;
     proposalPointer.keyword("/quorum-height").setValue<u64>(this.quorumHeight);
     proposalPointer.keyword("/quorum-weight").setValue<u64>(this.quorumWeight);
     proposalPointer.keyword("/content").set(this.body);
@@ -25,7 +31,12 @@ export class Proposal {
       ptr.append(id);
     }
   }
-  static from(height: u64, txindex: u32, field: Array<u128>, body: ArrayBuffer): Proposal {
+  static from(
+    height: u64,
+    txindex: u32,
+    field: Array<u128>,
+    body: ArrayBuffer,
+  ): Proposal {
     if (field.length < 2) {
       return changetype<Proposal>(0);
     }

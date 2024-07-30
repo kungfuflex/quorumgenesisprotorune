@@ -38368,6 +38368,40 @@
   local.get $this
   i32.load offset=4
  )
+ (func $assembly/indexer/QuorumMessageContext/QuorumMessageContext#proposalMinimum (param $this i32) (result i32)
+  (local $value i32)
+  (local $value|2 i64)
+  block $~lib/as-bignum/assembly/integer/u128/u128.from<i32>|inlined.30 (result i32)
+   i32.const 10000
+   local.set $value
+   i32.const 0
+   drop
+   i32.const 0
+   drop
+   i32.const 0
+   drop
+   i32.const 0
+   drop
+   i32.const 0
+   drop
+   i32.const 1
+   drop
+   block $~lib/as-bignum/assembly/integer/u128/u128.fromI64|inlined.30 (result i32)
+    local.get $value
+    i64.extend_i32_s
+    local.set $value|2
+    i32.const 0
+    local.get $value|2
+    local.get $value|2
+    i64.const 63
+    i64.shr_s
+    call $~lib/as-bignum/assembly/integer/u128/u128#constructor
+    br $~lib/as-bignum/assembly/integer/u128/u128.fromI64|inlined.30
+   end
+   br $~lib/as-bignum/assembly/integer/u128/u128.from<i32>|inlined.30
+  end
+  return
+ )
  (func $~lib/protorune/assembly/indexer/protomessage/MessageContext/MessageContext#get:transaction (param $this i32) (result i32)
   local.get $this
   i32.load offset=8
@@ -40163,8 +40197,6 @@
  (func $assembly/indexer/QuorumMessageContext/QuorumMessageContext#handle (param $this i32) (result i32)
   (local $action i32)
   (local $incomingGenesis i32)
-  (local $value i32)
-  (local $value|4 i64)
   (local $a i32)
   (local $b i32)
   (local $ah i64)
@@ -40195,35 +40227,8 @@
     local.get $incomingGenesis
     call $~lib/protorune/assembly/indexer/protomessage/IncomingRune/IncomingRune#get:amount
     local.set $a
-    block $~lib/as-bignum/assembly/integer/u128/u128.from<i32>|inlined.30 (result i32)
-     i32.const 10000
-     local.set $value
-     i32.const 0
-     drop
-     i32.const 0
-     drop
-     i32.const 0
-     drop
-     i32.const 0
-     drop
-     i32.const 0
-     drop
-     i32.const 1
-     drop
-     block $~lib/as-bignum/assembly/integer/u128/u128.fromI64|inlined.30 (result i32)
-      local.get $value
-      i64.extend_i32_s
-      local.set $value|4
-      i32.const 0
-      local.get $value|4
-      local.get $value|4
-      i64.const 63
-      i64.shr_s
-      call $~lib/as-bignum/assembly/integer/u128/u128#constructor
-      br $~lib/as-bignum/assembly/integer/u128/u128.fromI64|inlined.30
-     end
-     br $~lib/as-bignum/assembly/integer/u128/u128.from<i32>|inlined.30
-    end
+    local.get $this
+    call $assembly/indexer/QuorumMessageContext/QuorumMessageContext#proposalMinimum
     local.set $b
     local.get $a
     call $~lib/as-bignum/assembly/integer/u128/u128#get:hi

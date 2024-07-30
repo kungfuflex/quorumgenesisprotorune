@@ -26,7 +26,10 @@ export class GenesisProtoruneIndex extends Protorune<QuorumMessageContext> {
     i: u32,
   ): RunestoneMessage {
     const baseRunestone = tx.runestone();
-    const runestone = NumberingProtostone.fromProtostoneAndRanges(Protostone.from(baseRunestone), RUNE_TO_OUTPOINT);
+    const runestone = NumberingProtostone.fromProtostoneAndRanges(
+      Protostone.from(baseRunestone),
+      RUNE_TO_OUTPOINT,
+    );
     const unallocatedTo = runestone.fields.has(Field.POINTER)
       ? fieldTo<u32>(runestone.fields.get(Field.POINTER))
       : <u32>tx.defaultOutput();
@@ -55,4 +58,3 @@ export class GenesisProtoruneIndex extends Protorune<QuorumMessageContext> {
     return changetype<RunestoneMessage>(runestone);
   }
 }
-
