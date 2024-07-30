@@ -25,9 +25,11 @@ import {
 import {
   PROPOSALS
 } from "./tables";
+import { Source } from "as-rangesink/assembly/rangesink";
 export * from "protorune/assembly/view";
 export * from "./view";
 
+class RuneSource extends Source<u128, BSTU128> {}
 
 function isGenesisProtorune(rune: IncomingRune): boolean {
   if (rune.runeId.block === QUORUM_GENESIS_PROTORUNE_HEIGHT && rune.runeId.tx === QUORUM_GENESIS_PROTORUNE_TXINDEX) return true;
