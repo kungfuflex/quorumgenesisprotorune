@@ -5,7 +5,7 @@ import { Edict } from "metashrew-runes/assembly/indexer/Edict";
 import { RunestoneMessage } from "metashrew-runes/assembly/indexer/RunestoneMessage";
 import { RunesTransaction } from "metashrew-runes/assembly/indexer/RunesTransaction";
 import { RunesBlock } from "metashrew-runes/assembly/indexer/RunesBlock";
-import { NumberingProtostone } from "./NumberingProtostone";
+import { Numbering } from "./Numbering";
 import { RUNE_TO_OUTPOINT } from "../tables";
 import { QuorumMessageContext } from "./QuorumMessageContext";
 import { Protorune } from "protorune/assembly/indexer";
@@ -26,11 +26,10 @@ export class GenesisProtoruneIndex extends Protorune<QuorumMessageContext> {
     i: u32,
   ): RunestoneMessage {
     const baseRunestone = tx.runestone();
-    const runestone = NumberingProtostone.fromProtostoneAndRanges(
+    const runestone = Numbering.fromProtocolMessage(
       Protostone.from(baseRunestone),
-      RUNE_TO_OUTPOINT,
+      tx
     );
-    runestone._setTransaction(tx);
     const unallocatedTo = runestone.fields.has(Field.POINTER)
       ? fieldTo<u32>(runestone.fields.get(Field.POINTER))
       : <u32>tx.defaultOutput();
@@ -50,7 +49,7 @@ export class GenesisProtoruneIndex extends Protorune<QuorumMessageContext> {
         balancesByOutput,
         txid,
         runestoneOutputIndex,
-        runestone.asProtostone(),
+        runestone.unwrap(),
         edicts,
         burns,
       );

@@ -1,9 +1,12 @@
 import { BSTU128 } from "metashrew-as/assembly/indexer/widebst";
 import { u128 } from "as-bignum/assembly";
 import { Protostone } from "protorune/assembly/indexer/Protostone";
+import { RunestoneMessage } from "metashrew-runes/assembly/indexer/RunestoneMessage";
+import { RunesTransaction } from "metashrew-runes/assembly/indexer/RunesTransaction";
+import { RuneSource } from "./RuneSource";
 import { BalanceSheet } from "metashrew-runes/assembly/indexer/BalanceSheet";
 import { Edict } from "metashrew-runes/assembly/indexer/Edict";
-import { Output } from "metashrew-as/assembly/indexer/blockdata/Output";
+import { Output } from "metashrew-as/assembly/blockdata/transaction";
 import { RUNE_TO_OUTPOINT } from "../tables";
 import {
   AMOUNT,
@@ -11,7 +14,7 @@ import {
   CAP,
   MINTS_REMAINING,
   RUNE_ID_TO_ETCHING
-} from "metashrew-runes/assembly/constants";
+} from "metashrew-runes/assembly/indexer/constants";
 
 export function flatten<T>(ary: Array<Array<T>>): Array<T> {
   const result = new Array<T>(0);
@@ -25,7 +28,7 @@ export function flatten<T>(ary: Array<Array<T>>): Array<T> {
 
 class PointsReduce {
   public pointer: IndexPointer;
-  public output: Array<u128>;
+  public output: Array<Array<u128>>;
   constructor(pointer: IndexPointer) {
     this.pointer = pointer;
     this.output = new Array<Array<u128>>(0);
@@ -35,11 +38,11 @@ class PointsReduce {
   }
 }
 
-export function pointsFromKeys(ary: Array<ArrayBuffer>): Array<u128> {
+export function pointsFromKeys(runeId: ArrayBuffer, ary: Array<ArrayBuffer>): Array<u128> {
   return flatten<u128>(ary.reduce((r: PointsReduce, v: ArrayBuffer, i: i32, ary: Array<ArrayBuffer>) => {
     r.output.push(r.pointer.select(v).getList().map((v: ArrayBuffer) => fromArrayBuffer(v)));
     return r;
-  }, PointsReduce.from(OUTPOINT_TO_RUNE_RANGES)).output);
+  }, PointsReduce.from(OUTPOINT_TO_RUNE_RANGES.select(runeId))).output);
 }
 
 export function totalSupply(runeId: RuneId): u128 {
@@ -54,22 +57,51 @@ export function totalSupply(runeId: RuneId): u128 {
   return result;
 }
 
-export class Numbering<T extends RunestoneMessage> extends T {
-  public source: Source;
-  public sink: IndexPointer;
+export function has(ary: Array<ArrayBuffer>, needle: ArrayBuffer): boolean {
+  for (let i = 0; i < ary.length; i++) {
+    if (memory.compare(ary[i], needle) === 0) return true;
+  }
+  return false;
+}
+
+export function uniq(ary: Array<ArrayBuffer>): Array<ArrayBuffer> {
+  return ary.reduce((r: Array<ArrayBuffer>, v: ArrayBuffer, i: i32, ary: Array<ArrayBuffer>) => {
+    if (!has(r, v)) r.push(v);
+    return r;
+  }, new Array<ArrayBuffer>(0));
+}
+
+class SourceMapReduce {
+  public output: Map<string, RuneSource>;
   public tx: RunesTransaction;
-  _getTxid(): ArrayBuffer {
-    const box = Box.from(this.sink);
-    box.start += (box.len - 0x20);
-    return box.setLength(0x20).toArrayBuffer();
-  }
-  _setTransaction(tx: RunesTransaction): NumberingProtostone {
+  constructor(tx: RunesTransaction) {
     this.tx = tx;
-    return this;
+    this.output = new Map<string, RuneSource>();
   }
-  _setSource(txid: ArrayBuffer, source: Source, sink: IndexPointer): NumberingProtostone {
-    this.source = source;
-    this.sink = sink;
+  static from(tx: RunesTransaction): SourceMapReduce {
+    return new SourceMapReduce(tx);
+  }
+}
+
+export function sourceMapFromTransaction(tx: RunesTransaction): Map<string, RuneSource> {
+  const inputs = tx.ins.map((v: Input, i: i32, ary: Array<Input>) => v.previousOutput());
+  const balanceSheets = inputs.map((v: ArrayBuffer, i: i32, ary: Array<ArrayBuffer>) => {
+    return BalanceSheet.load(v);
+  }); 
+  const allRunes = uniq(flatten(balanceSheets.map<Array<ArrayBuffer>>((v: BalanceSheet) => v.runes)));
+  return allRunes.reduce((r: SourceMapReduce, v: ArrayBuffer, i: i32, ary: Array<ArrayBuffer>) => {
+    r.output.set(Box.from(v).toHexString(), new RuneSource(BSTU128.at(RUNE_TO_OUTPOINT.select(v)), pointsFromKeys(v, r.tx.ins.map((v: Input, i: i32, ary: Array<Input>) => v.previousOutput())), totalSupply(RuneId.fromBytes(v))));
+    return r;
+  }, SourceMapReduce.from(tx)).output;
+}
+
+export class Numbering<T extends RunestoneMessage> extends RunestoneMessage {
+  public source: Map<string, RuneSource>;
+  public tx: RunesTransaction;
+  _setTransaction(tx: RunesTransaction): Numbering<T> {
+    this.tx = tx;
+    this.source = sourceMapFromTransaction(tx);
+    return this;
   }
   updateBalancesForEdict(
     balancesByOutput: Map<u32, BalanceSheet>,
@@ -79,20 +111,18 @@ export class Numbering<T extends RunestoneMessage> extends T {
     runeId: ArrayBuffer,
   ): void {
     super.updateBalancesForEdict(balancesByOutput, balanceSheet, edictAmount, edictOutput, runeId);
-    this.source.pipeTo(this.sink, primitiveToBuffer<u32>(edictOutput), amount);
+    this.source.get(Box.from(runeId).toHexString()).pipeTo(OUTPOINT_TO_RUNE_RANGES.select(runeId), OutPoint.from(this.tx.txid(), primitiveToBuffer<u32>(edictOutput)).toArrayBuffer(), amount);
   }
   constructor(
     fields: Map<u64, Array<u128>>,
-    edicts: Array<StaticArray<u128>>,
-    protocolTag: u128,
+    edicts: Array<StaticArray<u128>>
   ) {
-    super(fields, edicts, protocolTag);
+    super(fields, edicts);
+    this.source = changetype<Map<string, Source>>(0);
     this.tx = changetype<RunesTransaction>(0);
-    this.source = changetype<Source>(0);
-    this.sink = changetype<ArrayBuffer>(0);
   }
-  asProtostone(): Protostone {
-    return changetype<Protostone>(this);
+  unwrap(): T {
+    return changetype<T>(this);
   }
   processEdict(
     balancesByOutput: Map<u32, BalanceSheet>,
@@ -104,20 +134,18 @@ export class Numbering<T extends RunestoneMessage> extends T {
       return true;
     }
     const runeId = edict.runeId();
-    this._setDrain(new Source(BSTU128.at(RUNE_TO_OUTPOINT.select(runeId)), pointsFromKeys(this.tx.ins.map((v: Input, i: i32, ary: Array<Input>) => v.previousOutput())), totalSupply(runeId)), , 
     return super.processEdict(balancesByOutput, balanceSheet, edict, outputs);
   }
-  static fromProtocolMessage(
+  static fromProtocolMessage<T extends RunestoneMessage>(
     stone: T,
-    ranges: BSTU128,
-  ): NumberingProtostone<T> {
-    return new NumberingProtostone(
+    tx: RunesTransaction
+  ): Numbering<T> {
+    return new Numbering<T>(
       protostone.fields,
-      protostone.edicts,
-      protostone.protocolTag,
-    )._setRanges(ranges);
+      protostone.edicts
+    )._setTransaction(tx);
   }
-  static from<T>(v: T): NumberingProtostone {
-    return changetype<NumberingProtostone>(v);
+  static from<T>(v: T): Numbering {
+    return changetype<Numbering>(v);
   }
 }
