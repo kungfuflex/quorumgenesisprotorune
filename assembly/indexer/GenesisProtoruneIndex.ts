@@ -30,6 +30,7 @@ export class GenesisProtoruneIndex extends Protorune<QuorumMessageContext> {
       Protostone.from(baseRunestone),
       RUNE_TO_OUTPOINT,
     );
+    runestone._setTransaction(tx);
     const unallocatedTo = runestone.fields.has(Field.POINTER)
       ? fieldTo<u32>(runestone.fields.get(Field.POINTER))
       : <u32>tx.defaultOutput();
