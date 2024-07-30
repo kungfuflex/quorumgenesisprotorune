@@ -5,6 +5,13 @@ import { BalanceSheet } from "metashrew-runes/assembly/indexer/BalanceSheet";
 import { Edict } from "metashrew-runes/assembly/indexer/Edict";
 import { Output } from "metashrew-as/assembly/indexer/blockdata/Output";
 import { RUNE_TO_OUTPOINT } from "../tables";
+import {
+  AMOUNT,
+  PREMINE,
+  CAP,
+  MINTS_REMAINING,
+  RUNE_ID_TO_ETCHING
+} from "metashrew-runes/assembly/constants";
 
 export function flatten<T>(ary: Array<Array<T>>): Array<T> {
   const result = new Array<T>(0);
@@ -32,10 +39,22 @@ export function pointsFromKeys(ary: Array<ArrayBuffer>): Array<u128> {
   return flatten<u128>(ary.reduce((r: PointsReduce, v: ArrayBuffer, i: i32, ary: Array<ArrayBuffer>) => {
     r.output.push(r.pointer.select(v).getList().map((v: ArrayBuffer) => fromArrayBuffer(v)));
     return r;
-  }).output);
+  }, PointsReduce.from(OUTPOINT_TO_RUNE_RANGES)).output);
 }
 
-export class NumberingRunestone<T extends RunestoneMessage> extends T {
+export function totalSupply(runeId: RuneId): u128 {
+  const runeIdBytes = runeId.toBytes();
+  const name = RUNE_ID_TO_ETCHING.select(runeIdBytes).get();
+
+  let result: u128 = fromArrayBuffer(PREMINE.select(name).get());
+  const cap: u128 = fromArrayBuffer(CAP.select(name).get());
+  if (cap.isZero()) return result;
+  const mintsRemaining: u128 = fromArrayBuffer(MINTS_REMAINING.select(name).get());
+  if (mintsRemaining !== cap) result += (fromArrayBuffer(AMOUNT.select(name).get())*(cap - mintsRemaining));
+  return result;
+}
+
+export class Numbering<T extends RunestoneMessage> extends T {
   public source: Source;
   public sink: IndexPointer;
   public tx: RunesTransaction;
@@ -48,9 +67,9 @@ export class NumberingRunestone<T extends RunestoneMessage> extends T {
     this.tx = tx;
     return this;
   }
-  _setDrain(txid: ArrayBuffer, source: Source, sink: IndexPointer): NumberingProtostone {
+  _setSource(txid: ArrayBuffer, source: Source, sink: IndexPointer): NumberingProtostone {
     this.source = source;
-    this.sink;
+    this.sink = sink;
   }
   updateBalancesForEdict(
     balancesByOutput: Map<u32, BalanceSheet>,
@@ -84,9 +103,8 @@ export class NumberingRunestone<T extends RunestoneMessage> extends T {
     if (edict.block.isZero() && !edict.transactionIndex.isZero()) {
       return true;
     }
-    const runeId = edict.runeId().toBytes();
-    const points = 
-    this._setDrain(new Source(RUNE_TO_OUTPOINT.select(
+    const runeId = edict.runeId();
+    this._setDrain(new Source(BSTU128.at(RUNE_TO_OUTPOINT.select(runeId)), pointsFromKeys(this.tx.ins.map((v: Input, i: i32, ary: Array<Input>) => v.previousOutput())), totalSupply(runeId)), , 
     return super.processEdict(balancesByOutput, balanceSheet, edict, outputs);
 
     const edictOutput = toPrimitive<u32>(edict.output);
