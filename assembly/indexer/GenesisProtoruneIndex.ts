@@ -38,7 +38,7 @@ export class GenesisProtoruneIndex extends Protorune<QuorumMessageContext> {
     const balancesByOutput = changetype<Map<u32, ProtoruneBalanceSheet>>(
       baseRunestone.process(tx, txid, height, i),
     );
-    const protostones = runestone.protostones(tx.outs.length + 1);
+    const protostones = changetype<Protostone>(runestone).protostones(tx.outs.length + 1);
     const burns = protostones.burns();
 
     const runestoneOutputIndex = tx.runestoneOutputIndex();
