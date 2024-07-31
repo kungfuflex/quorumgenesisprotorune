@@ -42112,58 +42112,6 @@
   end
   unreachable
  )
- (func $assembly/indexer/Numbering/Numbering<~lib/protorune/assembly/indexer/Protostone/Protostone>#processEdict (param $this i32) (param $balancesByOutput i32) (param $balanceSheet i32) (param $edict i32) (param $outputs i32) (result i32)
-  (local $this|5 i32)
-  (local $this|6 i32)
-  (local $runeId i32)
-  block $~lib/as-bignum/assembly/integer/u128/u128#isZero|inlined.19 (result i32)
-   local.get $edict
-   call $~lib/metashrew-runes/assembly/indexer/Edict/Edict#get:block
-   local.set $this|5
-   local.get $this|5
-   call $~lib/as-bignum/assembly/integer/u128/u128#get:lo
-   local.get $this|5
-   call $~lib/as-bignum/assembly/integer/u128/u128#get:hi
-   i64.or
-   i64.const 0
-   i64.ne
-   i32.eqz
-   br $~lib/as-bignum/assembly/integer/u128/u128#isZero|inlined.19
-  end
-  if (result i32)
-   block $~lib/as-bignum/assembly/integer/u128/u128#isZero|inlined.20 (result i32)
-    local.get $edict
-    call $~lib/metashrew-runes/assembly/indexer/Edict/Edict#get:transactionIndex
-    local.set $this|6
-    local.get $this|6
-    call $~lib/as-bignum/assembly/integer/u128/u128#get:lo
-    local.get $this|6
-    call $~lib/as-bignum/assembly/integer/u128/u128#get:hi
-    i64.or
-    i64.const 0
-    i64.ne
-    i32.eqz
-    br $~lib/as-bignum/assembly/integer/u128/u128#isZero|inlined.20
-   end
-   i32.eqz
-  else
-   i32.const 0
-  end
-  if
-   i32.const 1
-   return
-  end
-  local.get $edict
-  call $~lib/metashrew-runes/assembly/indexer/Edict/Edict#runeId
-  local.set $runeId
-  local.get $this
-  local.get $balancesByOutput
-  local.get $balanceSheet
-  local.get $edict
-  local.get $outputs
-  call $~lib/metashrew-runes/assembly/indexer/RunestoneMessage/RunestoneMessage#processEdict
-  return
- )
  (func $~lib/protorune/assembly/indexer/Protostone/Protostone#saveBalanceSheet (param $this i32) (param $sheet i32) (param $txid i32) (param $output i32) (param $isCenotaph i32)
   local.get $sheet
   local.get $this
@@ -44355,37 +44303,24 @@
  (func $~lib/metashrew-runes/assembly/indexer/RunestoneMessage/RunestoneMessage#processEdict@override (param $0 i32) (param $1 i32) (param $2 i32) (param $3 i32) (param $4 i32) (result i32)
   (local $5 i32)
   block $default
-   block $case1
-    block $case0
-     local.get $0
-     i32.const 8
-     i32.sub
-     i32.load
-     local.set $5
-     local.get $5
-     i32.const 104
-     i32.eq
-     br_if $case0
-     local.get $5
-     i32.const 105
-     i32.eq
-     br_if $case1
-     br $default
-    end
+   block $case0
     local.get $0
-    local.get $1
-    local.get $2
-    local.get $3
-    local.get $4
-    call $~lib/protorune/assembly/indexer/Protostone/Protostone#processEdict
-    return
+    i32.const 8
+    i32.sub
+    i32.load
+    local.set $5
+    local.get $5
+    i32.const 104
+    i32.eq
+    br_if $case0
+    br $default
    end
    local.get $0
    local.get $1
    local.get $2
    local.get $3
    local.get $4
-   call $assembly/indexer/Numbering/Numbering<~lib/protorune/assembly/indexer/Protostone/Protostone>#processEdict
+   call $~lib/protorune/assembly/indexer/Protostone/Protostone#processEdict
    return
   end
   local.get $0

@@ -130,18 +130,6 @@ export class Numbering<T extends RunestoneMessage> extends RunestoneMessage {
   unwrap(): T {
     return changetype<T>(this);
   }
-  processEdict(
-    balancesByOutput: Map<u32, BalanceSheet>,
-    balanceSheet: BalanceSheet,
-    edict: Edict,
-    outputs: Array<Output>,
-  ): bool {
-    if (edict.block.isZero() && !edict.transactionIndex.isZero()) {
-      return true;
-    }
-    const runeId = edict.runeId();
-    return super.processEdict(balancesByOutput, balanceSheet, edict, outputs);
-  }
   static fromProtocolMessage<T extends RunestoneMessage>(
     stone: T,
     tx: RunesTransaction
@@ -151,7 +139,7 @@ export class Numbering<T extends RunestoneMessage> extends RunestoneMessage {
       stone.edicts
     )._setTransaction(tx);
   }
-  static from<T>(v: T): Numbering {
-    return changetype<Numbering>(v);
+  static from<T>(v: T): Numbering<T> {
+    return changetype<Numbering<T>>(v);
   }
 }
