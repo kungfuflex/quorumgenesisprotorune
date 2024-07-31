@@ -29,7 +29,7 @@ export class RuneSource {
     if (this.index >= this.points.length) return true;
     return this.index === this.points.length - 1 && this.offset >= this.distances[this.distances.length - 1];
   }
-  pipeTo(prefix: IndexPointer, target: ArrayBuffer, value: u128): u128 {
+  pipeTo(prefix: IndexPointer, target: ArrayBuffer, value: u128, protocolTag: u128): u128 {
     let remaining = value;
     const pointer = prefix.select(target);
     while (!this.consumed()) {
@@ -37,6 +37,8 @@ export class RuneSource {
       const valueToApply = min(rangeRemaining, remaining);
       const point = this.points[this.index] + this.offset;
       this.table.set(point, target);
+      const keyBytes = toArrayBuffer(point);
+      this.table.ptr.select(keyBytes).keyword("/protocol").set(toArrayBuffer(protocolTag));
       pointer.append(toArrayBuffer(point));
       this.offset += valueToApply;
       remaining -= valueToApply;

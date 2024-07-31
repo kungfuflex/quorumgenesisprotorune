@@ -101,45 +101,20 @@ export function sourceMapFromTransaction(tx: RunesTransaction): Map<string, Rune
   }, SourceMapReduce.from(tx)).output;
 }
 
-export class Numbering<T extends RunestoneMessage> extends RunestoneMessage {
-  public source: Map<string, RuneSource>;
-  public tx: RunesTransaction;
-  _setTransaction(tx: RunesTransaction): Numbering<T> {
-    this.tx = tx;
-    this.source = sourceMapFromTransaction(tx);
-    return this;
+export class NumberingMixin {
+  _setTransactionImpl<T>(v: T, tx: RunesTransaction): T {
+    v.tx = tx;
+    v.source = sourceMapFromTransaction(tx);
+    return v;
   }
-  updateBalancesForEdict(
-    balancesByOutput: Map<u32, BalanceSheet>,
-    balanceSheet: BalanceSheet,
-    edictAmount: u128,
-    edictOutput: u32,
-    runeId: ArrayBuffer,
-  ): void {
-    super.updateBalancesForEdict(balancesByOutput, balanceSheet, edictAmount, edictOutput, runeId);
-    this.source.get(Box.from(runeId).toHexString()).pipeTo(OUTPOINT_TO_RUNE_RANGES.select(runeId), OutPoint.from(this.tx.txid(), edictOutput).toArrayBuffer(), edictAmount);
+  _fromImpl<S, T>(v: S): T {
+    return changetype<T>(v);
   }
-  constructor(
-    fields: Map<u64, Array<u128>>,
-    edicts: Array<StaticArray<u128>>
-  ) {
-    super(fields, edicts);
-    this.source = changetype<Map<string, RuneSource>>(0);
-    this.tx = changetype<RunesTransaction>(0);
+  _updateForEdictHookImplProtocolTag<T>(v: T, edictAmount: u128, edictOutput: u32, runeId: ArrayBuffer, protocolTag: u128): void {
+    v.source.get(Box.from(runeId).toHexString()).pipeTo(OUTPOINT_TO_RUNE_RANGES.select(runeId), OutPoint.from(v.tx.txid(), edictOutput).toArrayBuffer(), edictAmount, protocolTag);
+    
   }
-  unwrap(): T {
-    return changetype<T>(this);
-  }
-  static fromProtocolMessage<T extends RunestoneMessage>(
-    stone: T,
-    tx: RunesTransaction
-  ): Numbering<T> {
-    return new Numbering<T>(
-      stone.fields,
-      stone.edicts
-    )._setTransaction(tx);
-  }
-  static from<T>(v: T): Numbering<T> {
-    return changetype<Numbering<T>>(v);
+  _updateForEdictHookImpl<T>(v: T, edictAmount: u128, edictOutput: u32, runeId: ArrayBuffer): void {
+    this._updateForEdictHookImplProtocolTag<T>(v, edictAmount, edictOutput, runeId, u128.from(13));
   }
 }
