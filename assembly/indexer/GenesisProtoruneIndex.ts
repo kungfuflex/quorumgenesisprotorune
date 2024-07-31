@@ -34,17 +34,16 @@ export class GenesisProtoruneIndex extends Protorune<QuorumMessageContext> {
     height: u32,
     i: u32,
   ): RunestoneMessage {
-    const baseRunestone = tx.runestone();
-    const runestone = NumberingProtostone.fromProtocolMessage(Protostone.from(baseRunestone), tx);
+    const runestone = NumberingRunestone.fromProtocolMessage(tx.runestone(), tx);
     const unallocatedTo = runestone.fields.has(Field.POINTER)
       ? fieldTo<u32>(runestone.fields.get(Field.POINTER))
       : <u32>tx.defaultOutput();
     if (changetype<usize>(runestone) === 0)
       return changetype<RunestoneMessage>(0);
     const balancesByOutput = changetype<Map<u32, ProtoruneBalanceSheet>>(
-      NumberingRunestone.fromProtocolMessage(baseRunestone, tx).process(tx, txid, height, i),
+      runestone.process(tx, txid, height, i),
     );
-    const protostones = runestone.protostones(tx.outs.length + 1);
+    const protostones = Protostone.from(runestone).protostones(tx.outs.length + 1);
     const burns = protostones.burns();
 
     const runestoneOutputIndex = tx.runestoneOutputIndex();
@@ -55,12 +54,12 @@ export class GenesisProtoruneIndex extends Protorune<QuorumMessageContext> {
         balancesByOutput,
         txid,
         runestoneOutputIndex,
-        runestone.unwrap(),
+        Protostone.from(runestone.unwrap()),
         edicts,
         burns,
       );
     }
-    this.processProtostones(expandToNumberingAlign(protostones.flat(), tx), block, height, tx, txid, i);
-    return changetype<RunestoneMessage>(runestone);
+    this.processProtostones(protostones.flat(), block, height, tx, txid, i);
+    return runestone.unwrap();
   }
 }
