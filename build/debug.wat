@@ -41939,7 +41939,10 @@
   local.get $edictOutput
   local.get $runeId
   call $~lib/metashrew-runes/assembly/indexer/RunestoneMessage/RunestoneMessage#updateBalancesForEdict
-  i32.const 0
+  block $assembly/utils/mixin<assembly/indexer/NumberingMixin/NumberingMixin>|inlined.2 (result i32)
+   i32.const 0
+   br $assembly/utils/mixin<assembly/indexer/NumberingMixin/NumberingMixin>|inlined.2
+  end
   local.get $this
   local.get $edictAmount
   local.get $edictOutput

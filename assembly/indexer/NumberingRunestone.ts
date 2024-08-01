@@ -40,7 +40,7 @@ export class NumberingRunestone extends RunestoneMessage {
     runeId: ArrayBuffer,
   ): void {
     super.updateBalancesForEdict(balancesByOutput, balanceSheet, edictAmount, edictOutput, runeId);
-    changetype<NumberingMixin>(0)._updateForEdictHookImpl(this, edictAmount, edictOutput, runeId);
+    mixin<NumberingMixin>()._updateForEdictHookImpl(this, edictAmount, edictOutput, runeId);
   }
   constructor(
     fields: Map<u64, Array<u128>>,
