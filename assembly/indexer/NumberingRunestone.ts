@@ -22,13 +22,14 @@ import {
 } from "metashrew-runes/assembly/indexer/constants";
 import { IndexPointer } from "metashrew-as/assembly/indexer/tables";
 import { NumberingMixin } from "./NumberingMixin";
+import { mixin } from "../utils";
 
 
 export class NumberingRunestone extends RunestoneMessage {
   public source: Map<string, RuneSource>;
   public tx: RunesTransaction;
   _setTransaction(tx: RunesTransaction): NumberingRunestone {
-    changetype<NumberingMixin>(0)._setTransactionImpl<NumberingRunestone>(this, tx);
+    mixin<NumberingMixin>()._setTransactionImpl<NumberingRunestone>(this, tx);
     return this;
   }
   updateBalancesForEdict(
@@ -50,7 +51,7 @@ export class NumberingRunestone extends RunestoneMessage {
     this.tx = changetype<RunesTransaction>(0);
   }
   unwrap(): RunestoneMessage {
-    return changetype<RunestoneMessage>(this);
+    return mixin<NumberingMixin>()._fromImpl<NumberingRunestone, RunestoneMessage>(this);
   }
   static fromProtocolMessage(
     stone: RunestoneMessage,
@@ -62,6 +63,6 @@ export class NumberingRunestone extends RunestoneMessage {
     )._setTransaction(tx);
   }
   static from<T>(v: T): NumberingRunestone {
-    changetype<NumberingMixin>(0)._fromImpl<RunestoneMessage, NumberingRunestone>(v);
+    mixin<NumberingMixin>()._fromImpl<RunestoneMessage, NumberingRunestone>(v);
   }
 }

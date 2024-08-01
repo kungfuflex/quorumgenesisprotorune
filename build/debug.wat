@@ -35539,7 +35539,10 @@
   return
  )
  (func $assembly/indexer/NumberingRunestone/NumberingRunestone#_setTransaction (param $this i32) (param $tx i32) (result i32)
-  i32.const 0
+  block $assembly/utils/mixin<assembly/indexer/NumberingMixin/NumberingMixin>|inlined.0 (result i32)
+   i32.const 0
+   br $assembly/utils/mixin<assembly/indexer/NumberingMixin/NumberingMixin>|inlined.0
+  end
   local.get $this
   local.get $tx
   call $assembly/indexer/NumberingMixin/NumberingMixin#_setTransactionImpl<assembly/indexer/NumberingRunestone/NumberingRunestone>
@@ -36798,8 +36801,17 @@
   call $~lib/array/Array<~lib/protorune/assembly/indexer/Protoburn/Protoburn>#get:length_
   return
  )
+ (func $"assembly/indexer/NumberingMixin/NumberingMixin#_fromImpl<assembly/indexer/NumberingRunestone/NumberingRunestone,~lib/metashrew-runes/assembly/indexer/RunestoneMessage/RunestoneMessage>" (param $this i32) (param $v i32) (result i32)
+  local.get $v
+  return
+ )
  (func $assembly/indexer/NumberingRunestone/NumberingRunestone#unwrap (param $this i32) (result i32)
+  block $assembly/utils/mixin<assembly/indexer/NumberingMixin/NumberingMixin>|inlined.1 (result i32)
+   i32.const 0
+   br $assembly/utils/mixin<assembly/indexer/NumberingMixin/NumberingMixin>|inlined.1
+  end
   local.get $this
+  call $"assembly/indexer/NumberingMixin/NumberingMixin#_fromImpl<assembly/indexer/NumberingRunestone/NumberingRunestone,~lib/metashrew-runes/assembly/indexer/RunestoneMessage/RunestoneMessage>"
   return
  )
  (func $"~lib/map/Map<u32,~lib/protorune/assembly/indexer/ProtoruneBalanceSheet/ProtoruneBalanceSheet>#get:buckets" (param $this i32) (result i32)

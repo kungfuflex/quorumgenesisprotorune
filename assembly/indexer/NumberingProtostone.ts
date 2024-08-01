@@ -21,13 +21,14 @@ import {
   RUNE_ID_TO_ETCHING
 } from "metashrew-runes/assembly/indexer/constants";
 import { IndexPointer } from "metashrew-as/assembly/indexer/tables";
+import { mixin } from "../utils";
 import { NumberingMixinProtocol } from "./NumberingMixinProtocol";
 
 export class NumberingProtostone extends Protostone {
   public source: Map<string, RuneSource>;
   public tx: RunesTransaction;
   _setTransaction(tx: RunesTransaction): NumberingProtostone {
-    changetype<NumberingMixinProtocol>(0)._setTransactionImpl<NumberingProtostone>(this, tx);
+    mixin<NumberingMixinProtocol>()._setTransactionImpl<NumberingProtostone>(this, tx);
     return this;
   }
   updateBalancesForEdict(
@@ -38,7 +39,7 @@ export class NumberingProtostone extends Protostone {
     runeId: ArrayBuffer,
   ): void {
     super.updateBalancesForEdict(balancesByOutput, balanceSheet, edictAmount, edictOutput, runeId);
-    changetype<NumberingMixinProtocol>(0)._updateForEdictHookImpl(this, edictAmount, edictOutput, runeId);
+    mixin<NumberingMixinProtocol>()._updateForEdictHookImpl(this, edictAmount, edictOutput, runeId);
   }
   constructor(
     fields: Map<u64, Array<u128>>,
@@ -63,6 +64,6 @@ export class NumberingProtostone extends Protostone {
     )._setTransaction(tx);
   }
   static from<T>(v: T): NumberingProtostone {
-    changetype<NumberingMixinProtocol>(0)._fromImpl<Protostone, NumberingProtostone>(v);
+    mixin<NumberingMixinProtocol>()._fromImpl<Protostone, NumberingProtostone>(v);
   }
 }
