@@ -17,8 +17,12 @@ import {
   OutPoint,
 } from "metashrew-as/assembly/blockdata/transaction";
 import { fieldTo } from "metashrew-runes/assembly/utils";
+import { console } from "metashrew-as/assembly/utils";
 
-function expandToNumberingAlign(v: Array<Protostone>, tx: RunesTransaction): Array<Protostone> {
+function expandToNumberingAlign(
+  v: Array<Protostone>,
+  tx: RunesTransaction,
+): Array<Protostone> {
   const result = new Array<Protostone>(0);
   for (let i = 0; i < v.length; i++) {
     result.push(NumberingProtostone.fromProtocolMessage(v[i], tx).unwrap());
@@ -34,19 +38,23 @@ export class GenesisProtoruneIndex extends Protorune<QuorumMessageContext> {
     height: u32,
     i: u32,
   ): RunestoneMessage {
-    const runestone = NumberingRunestone.fromProtocolMessage(tx.runestone(), tx);
-    const unallocatedTo = runestone.fields.has(Field.POINTER)
-      ? fieldTo<u32>(runestone.fields.get(Field.POINTER))
-      : <u32>tx.defaultOutput();
-    if (changetype<usize>(runestone) === 0)
+    const baseRunestone = tx.runestone();
+    if (changetype<usize>(baseRunestone) === 0)
       return changetype<RunestoneMessage>(0);
+    const unallocatedTo = baseRunestone.fields.has(Field.POINTER)
+      ? fieldTo<u32>(baseRunestone.fields.get(Field.POINTER))
+      : <u32>tx.defaultOutput();
+    const runestone = NumberingRunestone.fromProtocolMessage(baseRunestone, tx);
     const balancesByOutput = changetype<Map<u32, ProtoruneBalanceSheet>>(
       runestone.process(tx, txid, height, i),
     );
-    const protostones = Protostone.from(runestone).protostones(tx.outs.length + 1);
+    const protostones = Protostone.from(runestone.unwrap()).protostones(
+      tx.outs.length + 1,
+    );
     const burns = protostones.burns();
 
     const runestoneOutputIndex = tx.runestoneOutputIndex();
+    console.log("getting edicts");
     const edicts = Edict.fromDeltaSeries(runestone.edicts);
     if (burns.length > 0) {
       this.processProtoburns(
@@ -60,6 +68,6 @@ export class GenesisProtoruneIndex extends Protorune<QuorumMessageContext> {
       );
     }
     this.processProtostones(protostones.flat(), block, height, tx, txid, i);
-    return runestone.unwrap();
+    return runestone;
   }
 }

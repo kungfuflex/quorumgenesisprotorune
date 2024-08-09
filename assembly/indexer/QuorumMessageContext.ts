@@ -18,11 +18,12 @@ import { QuorumField } from "./fields/QuorumField";
 import { Proposal } from "./Proposal";
 import { Box } from "metashrew-as/assembly/utils/box";
 import { u128 } from "as-bignum/assembly";
+import { console } from "metashrew-as/assembly/utils";
 
 function isGenesisProtorune(rune: IncomingRune): boolean {
   if (
-    rune.runeId.block === QUORUM_GENESIS_PROTORUNE_HEIGHT &&
-    rune.runeId.tx === QUORUM_GENESIS_PROTORUNE_TXINDEX
+    rune.runeId.block === u128.from(QUORUM_GENESIS_PROTORUNE_HEIGHT) &&
+    rune.runeId.tx === u128.from(QUORUM_GENESIS_PROTORUNE_TXINDEX)
   )
     return true;
   return false;
@@ -51,7 +52,10 @@ export class QuorumMessageContext extends MessageContext {
     "51554f52554de280a247454e45534953e280a250524f544f52554e452050726f706f73616c3a0a",
   );
   protocolTag(): u128 {
-    return u128.from(20000024);
+    console.log("making tag");
+    const tag = u128.from("20000024");
+    console.log(tag.toString());
+    return tag;
   }
   proposal(): ArrayBuffer {
     const inscription = findInscription(this.transaction.ins);
@@ -59,6 +63,7 @@ export class QuorumMessageContext extends MessageContext {
     const body = inscription.body();
     if (changetype<usize>(body) === 0) return changetype<ArrayBuffer>(0);
     if (
+      body != null &&
       memory.compare(
         changetype<usize>(body),
         changetype<usize>(QuorumMessageContext.PROPOSAL_PREFIX),

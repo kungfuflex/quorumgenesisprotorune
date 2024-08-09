@@ -19,8 +19,11 @@ import {
   buildCoinbaseToAddress,
   buildDefaultBlock,
 } from "metashrew-runes/lib/tests/utils/block-helpers";
-import { DEBUG_WASM } from "./utils/general";
-import { IndexPointer } from "metashrew-test";
+import { createProtoruneFixture } from "protorune/tests/utils/fixtures";
+import { DEBUG_WASM } from "./general";
+import { IndexerProgram, IndexPointer } from "metashrew-test";
+import { constructProtostoneTx } from "protorune/tests/utils/protoburn";
+import { inspect } from "node:util";
 
 class RuneId {
   public height: number;
@@ -33,19 +36,20 @@ class RuneId {
     const runeId = new RuneId();
     runeId.height = height;
     runeId.txindex = txindex;
+    return runeId;
   }
   toBytes(): Buffer {
     const result = Buffer.allocUnsafe(16);
-    result.writeUint64LE(0, this.height);
-    result.writeUint64LE(this.txindex);
+    result.writeUintLE(this.height, 0, 16);
+    result.writeUintLE(this.txindex, 16, 16);
     return result;
   }
 }
+const TEST_PROTOCOL_TAG = BigInt("20000024");
+const addHexPrefix = (s) => (s.substr(0, 2) === "0x" ? s : "0x" + s);
 
-const addHexPrefix = (s) => s.substr(0, 2) === '0x' ? s : '0x' + s;
-
-const toHex = (v) => addHexPrefix(v.toString('hex'));
-const concat = (...args) => toHex(Buffer.concat(...args));
+const toHex = (v) => addHexPrefix(v.toString("hex"));
+const concat = (...args: any[]) => toHex(Buffer.concat(args));
 
 const u32 = (v: number): string => {
   const result = Buffer.allocUnsafe(4);
@@ -54,14 +58,28 @@ const u32 = (v: number): string => {
 };
 
 const etchRune = (kv: any, { runeId, name, premine, outpoint }: any) => {
-  kv[concat(Buffer.from('/height/byruneid'), runeId.toBytes())] = u32(height);
+  kv[concat(Buffer.from("/height/byruneid"), runeId.toBytes())] = u32(
+    runeId.height,
+  );
   kv[concat(Buffer.from("/runeid/byetching/"), name)] = toHex(runeId.toBytes());
-  kv[concat(Buffer.from("/etching/byruneid/"), runeId.toBytes())] = toHex(Buffer.from(name));
-  kv[concat(Buffer.from("/runes/premine/"), Buffer.from(name))] = toHex(premine);
-}
+  kv[concat(Buffer.from("/etching/byruneid/"), runeId.toBytes())] = toHex(
+    Buffer.from(name),
+  );
+  kv[concat(Buffer.from("/runes/premine/"), Buffer.from(name))] =
+    toHex(premine);
+};
 
 describe("QUORUM•GENESIS•PROTORUNE", () => {
+  let program: IndexerProgram;
   before(async () => {
+    program = buildProgram(DEBUG_WASM);
+    program.setBlockHeight(840000);
   });
-  it("should", async () => {});
+  it("should test numbering on runestones", async () => {
+    let { runeId, block, output, refundOutput, input, premineAmount } =
+      await createProtoruneFixture(false);
+    program.setBlock(block.toHex());
+
+    await program.run("_start");
+  });
 });

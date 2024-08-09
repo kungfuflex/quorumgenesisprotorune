@@ -7,8 +7,12 @@ import { RuneSource } from "./RuneSource";
 import { RuneId } from "metashrew-runes/assembly/indexer/RuneId";
 import { BalanceSheet } from "metashrew-runes/assembly/indexer/BalanceSheet";
 import { Edict } from "metashrew-runes/assembly/indexer/Edict";
-import { OutPoint, Input, Output } from "metashrew-as/assembly/blockdata/transaction";
-import { primitiveToBuffer } from "metashrew-as/assembly/utils";
+import {
+  OutPoint,
+  Input,
+  Output,
+} from "metashrew-as/assembly/blockdata/transaction";
+import { console, primitiveToBuffer } from "metashrew-as/assembly/utils";
 import { toArrayBuffer, fromArrayBuffer } from "metashrew-runes/assembly/utils";
 import { OUTPOINT_TO_RUNE_RANGES, RUNE_TO_OUTPOINT } from "../tables";
 import { OUTPOINT_TO_RUNES } from "metashrew-runes/assembly/indexer/constants";
@@ -18,12 +22,11 @@ import {
   PREMINE,
   CAP,
   MINTS_REMAINING,
-  RUNE_ID_TO_ETCHING
+  RUNE_ID_TO_ETCHING,
 } from "metashrew-runes/assembly/indexer/constants";
 import { IndexPointer } from "metashrew-as/assembly/indexer/tables";
 import { NumberingMixin } from "./NumberingMixin";
 import { mixin } from "../utils";
-
 
 export class NumberingRunestone extends RunestoneMessage {
   public source: Map<string, RuneSource>;
@@ -39,30 +42,43 @@ export class NumberingRunestone extends RunestoneMessage {
     edictOutput: u32,
     runeId: ArrayBuffer,
   ): void {
-    super.updateBalancesForEdict(balancesByOutput, balanceSheet, edictAmount, edictOutput, runeId);
-    mixin<NumberingMixin>()._updateForEdictHookImpl(this, edictAmount, edictOutput, runeId);
+    super.updateBalancesForEdict(
+      balancesByOutput,
+      balanceSheet,
+      edictAmount,
+      edictOutput,
+      runeId,
+    );
+    mixin<NumberingMixin>()._updateForEdictHookImpl(
+      this,
+      edictAmount,
+      edictOutput,
+      runeId,
+    );
   }
-  constructor(
-    fields: Map<u64, Array<u128>>,
-    edicts: Array<StaticArray<u128>>
-  ) {
+  constructor(fields: Map<u64, Array<u128>>, edicts: Array<StaticArray<u128>>) {
     super(fields, edicts);
     this.source = changetype<Map<string, RuneSource>>(0);
     this.tx = changetype<RunesTransaction>(0);
   }
   unwrap(): RunestoneMessage {
-    return mixin<NumberingMixin>()._fromImpl<NumberingRunestone, RunestoneMessage>(this);
+    return mixin<NumberingMixin>()._fromImpl<
+      NumberingRunestone,
+      RunestoneMessage
+    >(this);
   }
   static fromProtocolMessage(
     stone: RunestoneMessage,
-    tx: RunesTransaction
+    tx: RunesTransaction,
   ): NumberingRunestone {
-    return new NumberingRunestone(
-      stone.fields,
-      stone.edicts
-    )._setTransaction(tx);
+    return new NumberingRunestone(stone.fields, stone.edicts)._setTransaction(
+      tx,
+    );
   }
-  static from<T>(v: T): NumberingRunestone {
-    mixin<NumberingMixin>()._fromImpl<RunestoneMessage, NumberingRunestone>(v);
+  static from<T extends RunestoneMessage>(v: T): NumberingRunestone {
+    return mixin<NumberingMixin>()._fromImpl<
+      RunestoneMessage,
+      NumberingRunestone
+    >(v);
   }
 }
