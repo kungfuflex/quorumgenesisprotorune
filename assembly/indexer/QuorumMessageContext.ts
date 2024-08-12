@@ -51,8 +51,8 @@ export class QuorumMessageContext extends MessageContext {
   static PROPOSAL_PREFIX: ArrayBuffer = decodeHex(
     "51554f52554de280a247454e45534953e280a250524f544f52554e452050726f706f73616c3a0a",
   );
+  @inline
   protocolTag(): u128 {
-    console.log("making tag");
     const tag = u128.from("20000024");
     console.log(tag.toString());
     return tag;
