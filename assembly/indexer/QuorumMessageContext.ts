@@ -5,12 +5,7 @@ import {
   QUORUM_GENESIS_PROTORUNE_TXINDEX,
 } from "../constants";
 import { Inscription } from "metashrew-as/assembly/blockdata/inscription";
-import {
-  Transaction,
-  Input,
-  Output,
-  OutPoint,
-} from "metashrew-as/assembly/blockdata/transaction";
+import { Input } from "metashrew-as/assembly/blockdata/transaction";
 import { MessageContext } from "protorune/assembly/indexer/protomessage/MessageContext";
 import { IncomingRune } from "protorune/assembly/indexer/protomessage/IncomingRune";
 import { RunestoneMessage } from "metashrew-runes/assembly/indexer/RunestoneMessage";
@@ -18,7 +13,6 @@ import { QuorumField } from "./fields/QuorumField";
 import { Proposal } from "./Proposal";
 import { Box } from "metashrew-as/assembly/utils/box";
 import { u128 } from "as-bignum/assembly";
-import { console } from "metashrew-as/assembly/utils";
 
 function isGenesisProtorune(rune: IncomingRune): boolean {
   if (
