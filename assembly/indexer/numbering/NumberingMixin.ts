@@ -10,7 +10,8 @@ import { OUTPOINT_TO_RUNE_RANGES, RUNE_TO_OUTPOINT } from "../../tables";
 import { OUTPOINT_TO_RUNES } from "metashrew-runes/assembly/indexer/constants";
 import { Box } from "metashrew-as/assembly/utils/box";
 import { IndexPointer } from "metashrew-as/assembly/indexer/tables";
-import { flatten, totalSupply, uniq } from "../../utils";
+import { flatten, logArray, mixin, totalSupply, uniq } from "../../utils";
+import { console } from "metashrew-as/assembly/utils";
 
 class PointsReduce {
   public pointer: IndexPointer;
@@ -28,7 +29,7 @@ export function pointsFromKeys(
   runeId: ArrayBuffer,
   ary: Array<ArrayBuffer>,
 ): Array<u128> {
-  return flatten<u128>(
+  const res = flatten<u128>(
     ary.reduce(
       (r: PointsReduce, v: ArrayBuffer, i: i32, ary: Array<ArrayBuffer>) => {
         r.output.push(
@@ -42,6 +43,8 @@ export function pointsFromKeys(
       PointsReduce.from(OUTPOINT_TO_RUNE_RANGES.select(runeId)),
     ).output,
   );
+  logArray(res);
+  return res;
 }
 
 class SourceMapReduce {
@@ -115,6 +118,8 @@ export class NumberingMixin {
     runeId: ArrayBuffer,
     protocolTag: u128,
   ): void {
+    logArray(v.source.keys());
+    console.log(Box.from(runeId).toHexString());
     v.source
       .get(Box.from(runeId).toHexString())
       .pipeTo(

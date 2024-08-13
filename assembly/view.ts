@@ -1,7 +1,7 @@
 import { input } from "metashrew-as/assembly/indexer";
 import { quorum } from "./proto/quorum";
 import { RuneId } from "metashrew-runes/assembly/indexer/RuneId";
-import { totalSupply } from "./indexer/numbering";
+import { totalSupply } from "./utils";
 import { console } from "metashrew-as/assembly/utils";
 
 export function runerange(): ArrayBuffer {

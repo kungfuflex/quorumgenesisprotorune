@@ -1,7 +1,8 @@
 import { u128 } from "as-bignum/assembly/integer";
-import { CAP, MINTS_REMAINING, PREMINE, RUNE_ID_TO_ETCHING } from "metashrew-runes/assembly/indexer/constants";
+import { CAP, MINTS_REMAINING, PREMINE, RUNE_ID_TO_ETCHING, AMOUNT } from "metashrew-runes/assembly/indexer/constants";
 import { RuneId } from "metashrew-runes/assembly/indexer/RuneId";
 import { fromArrayBuffer } from "metashrew-runes/assembly/utils";
+import { console } from "metashrew-as/assembly/utils/logging"
 
 //@ts-ignore
 @inline
@@ -62,4 +63,17 @@ export function totalSupply(runeId: RuneId): u128 {
     result +=
       fromArrayBuffer(AMOUNT.select(name).get()) * (cap - mintsRemaining);
   return result;
+}
+
+class Stringifiable {
+  toString(): string {
+    return ""
+  }
+}
+
+export function logArray<T extends Stringifiable>(ary: Array<T>): void {
+  console.log("Logging array of type [" + nameof<T>()+"] and length: " + ary.length.toString());
+  for (let i = 0; i < ary.length; i++) {
+    console.log("[" + i.toString() + "]: " + ary[i].toString());
+  }
 }
