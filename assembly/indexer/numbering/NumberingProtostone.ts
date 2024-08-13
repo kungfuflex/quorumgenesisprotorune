@@ -59,9 +59,10 @@ export class NumberingProtostone extends Protostone {
       stone.protocolTag,
     )._setTransaction(tx);
   }
-  static from<T>(v: T): NumberingProtostone {
-    mixin<NumberingMixinProtocol>()._fromImpl<Protostone, NumberingProtostone>(
-      v,
-    );
+  static from<T extends Protostone>(v: T): NumberingProtostone {
+    return mixin<NumberingMixinProtocol>()._fromImpl<
+      Protostone,
+      NumberingProtostone
+    >(v);
   }
 }

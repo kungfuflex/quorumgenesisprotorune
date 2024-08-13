@@ -9,15 +9,8 @@ import { fromArrayBuffer } from "metashrew-runes/assembly/utils";
 import { OUTPOINT_TO_RUNE_RANGES, RUNE_TO_OUTPOINT } from "../../tables";
 import { OUTPOINT_TO_RUNES } from "metashrew-runes/assembly/indexer/constants";
 import { Box } from "metashrew-as/assembly/utils/box";
-import {
-  AMOUNT,
-  PREMINE,
-  CAP,
-  MINTS_REMAINING,
-  RUNE_ID_TO_ETCHING,
-} from "metashrew-runes/assembly/indexer/constants";
 import { IndexPointer } from "metashrew-as/assembly/indexer/tables";
-import { flatten } from "../../utils";
+import { flatten, totalSupply, uniq } from "../../utils";
 
 class PointsReduce {
   public pointer: IndexPointer;
@@ -48,52 +41,6 @@ export function pointsFromKeys(
       },
       PointsReduce.from(OUTPOINT_TO_RUNE_RANGES.select(runeId)),
     ).output,
-  );
-}
-
-export function totalSupply(runeId: RuneId): u128 {
-  const runeIdBytes = runeId.toBytes();
-  const name = RUNE_ID_TO_ETCHING.select(runeIdBytes).get();
-
-  let result: u128 = fromArrayBuffer(PREMINE.select(name).get());
-  const cap: u128 = fromArrayBuffer(CAP.select(name).get());
-  if (cap.isZero()) return result;
-  const mintsRemaining: u128 = fromArrayBuffer(
-    MINTS_REMAINING.select(name).get(),
-  );
-  if (mintsRemaining !== cap)
-    result +=
-      fromArrayBuffer(AMOUNT.select(name).get()) * (cap - mintsRemaining);
-  return result;
-}
-
-export function has(ary: Array<ArrayBuffer>, needle: ArrayBuffer): boolean {
-  for (let i = 0; i < ary.length; i++) {
-    if (
-      ary[i].byteLength === needle.byteLength &&
-      memory.compare(
-        changetype<usize>(ary[i]),
-        changetype<usize>(needle),
-        <usize>needle.byteLength,
-      ) === 0
-    )
-      return true;
-  }
-  return false;
-}
-
-export function uniq(ary: Array<ArrayBuffer>): Array<ArrayBuffer> {
-  return ary.reduce(
-    (
-      r: Array<ArrayBuffer>,
-      v: ArrayBuffer,
-      i: i32,
-      ary: Array<ArrayBuffer>,
-    ) => {
-      if (!has(r, v)) r.push(v);
-      return r;
-    },
-    new Array<ArrayBuffer>(0),
   );
 }
 

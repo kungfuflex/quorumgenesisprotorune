@@ -1,9 +1,14 @@
-import { MessageContext } from "protorune/assembly/indexer/protomessage";
-import { NumberingMixin } from "./NumberingMixin";
+import { NumberingMixin, WithSourceMap } from "./NumberingMixin";
 import { u128 } from "as-bignum/assembly";
 
+class WithSourceMapProtocol extends WithSourceMap {
+  protocolTag(): u128 {
+    return u128.Zero;
+  }
+}
+
 export class NumberingMixinProtocol extends NumberingMixin {
-  _updateForEdictHook<T extends MessageContext>(
+  _updateForEdictHook<T extends WithSourceMapProtocol>(
     v: T,
     edictAmount: u128,
     edictOutput: u32,
