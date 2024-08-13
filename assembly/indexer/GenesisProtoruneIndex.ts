@@ -5,17 +5,9 @@ import { Edict } from "metashrew-runes/assembly/indexer/Edict";
 import { RunestoneMessage } from "metashrew-runes/assembly/indexer/RunestoneMessage";
 import { RunesTransaction } from "metashrew-runes/assembly/indexer/RunesTransaction";
 import { RunesBlock } from "metashrew-runes/assembly/indexer/RunesBlock";
-import { NumberingRunestone } from "./NumberingRunestone";
-import { NumberingProtostone } from "./NumberingProtostone";
-import { RUNE_TO_OUTPOINT } from "../tables";
+import { NumberingRunestone, NumberingProtostone } from "./numbering";
 import { QuorumMessageContext } from "./QuorumMessageContext";
 import { Protorune } from "protorune/assembly/indexer";
-import {
-  Transaction,
-  Input,
-  Output,
-  OutPoint,
-} from "metashrew-as/assembly/blockdata/transaction";
 import { fieldTo } from "metashrew-runes/assembly/utils";
 import { console } from "metashrew-as/assembly/utils";
 

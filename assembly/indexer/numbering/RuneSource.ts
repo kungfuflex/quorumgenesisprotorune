@@ -18,18 +18,29 @@ export class RuneSource {
     for (let i: i32 = 0; i < points.length; i++) {
       this.distances[i] = min(table.seekGreater(points[0]), limit);
     }
-
   }
   pull(): RuneSource {
-    this.points.reduce((r: RuneSource, v: u128, i: i32, ary: Array<u128>) => {
-      r.table.set(v, new ArrayBuffer(0));
-    }, this);
+    return this.points.reduce(
+      (r: RuneSource, v: u128, i: i32, ary: Array<u128>) => {
+        r.table.set(v, new ArrayBuffer(0));
+        return r;
+      },
+      this,
+    );
   }
   consumed(): boolean {
     if (this.index >= this.points.length) return true;
-    return this.index === this.points.length - 1 && this.offset >= this.distances[this.distances.length - 1];
+    return (
+      this.index === this.points.length - 1 &&
+      this.offset >= this.distances[this.distances.length - 1]
+    );
   }
-  pipeTo(prefix: IndexPointer, target: ArrayBuffer, value: u128, protocolTag: u128): u128 {
+  pipeTo(
+    prefix: IndexPointer,
+    target: ArrayBuffer,
+    value: u128,
+    protocolTag: u128,
+  ): u128 {
     let remaining = value;
     const pointer = prefix.select(target);
     while (!this.consumed()) {
@@ -38,13 +49,16 @@ export class RuneSource {
       const point = this.points[this.index] + this.offset;
       this.table.set(point, target);
       const keyBytes = toArrayBuffer(point);
-      this.table.ptr.select(keyBytes).keyword("/protocol").set(toArrayBuffer(protocolTag));
+      this.table.ptr
+        .select(keyBytes)
+        .keyword("/protocol")
+        .set(toArrayBuffer(protocolTag));
       pointer.append(toArrayBuffer(point));
       this.offset += valueToApply;
       remaining -= valueToApply;
       if (this.offset === this.distances[this.index]) {
         this.index++;
-	this.offset = u128.from(0);
+        this.offset = u128.from(0);
       }
       if (remaining.isZero()) break;
     }
