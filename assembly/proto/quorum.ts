@@ -671,6 +671,78 @@ namespace __proto {
   }
 }
 export namespace protorune {
+  export class RuneId {
+    public height: u32;
+    public txindex: u32;
+
+    // Decodes RuneId from an ArrayBuffer
+    static decode(buf: ArrayBuffer): RuneId {
+      return RuneId.decodeDataView(new DataView(buf));
+    }
+
+    // Decodes RuneId from a DataView
+    static decodeDataView(view: DataView): RuneId {
+      const decoder = new __proto.SafeDecoder(view);
+      const obj = new RuneId();
+
+      while (!decoder.eof()) {
+        const tag = decoder.tag();
+        const number = tag >>> 3;
+
+        switch (number) {
+          case 1: {
+            obj.height = decoder.uint32();
+            break;
+          }
+          case 2: {
+            obj.txindex = decoder.uint32();
+            break;
+          }
+
+          default:
+            decoder.skipType(tag & 7);
+            break;
+        }
+      }
+      if (decoder.invalid()) return changetype<RuneId>(0);
+      return obj;
+    } // decode RuneId
+
+    public size(): u32 {
+      let size: u32 = 0;
+
+      size += this.height == 0 ? 0 : 1 + __proto.Sizer.uint32(this.height);
+      size += this.txindex == 0 ? 0 : 1 + __proto.Sizer.uint32(this.txindex);
+
+      return size;
+    }
+
+    // Encodes RuneId to the ArrayBuffer
+    encode(): ArrayBuffer {
+      return changetype<ArrayBuffer>(
+        StaticArray.fromArray<u8>(this.encodeU8Array())
+      );
+    }
+
+    // Encodes RuneId to the Array<u8>
+    encodeU8Array(
+      encoder: __proto.Encoder = new __proto.Encoder(new Array<u8>())
+    ): Array<u8> {
+      const buf = encoder.buf;
+
+      if (this.height != 0) {
+        encoder.uint32(0x8);
+        encoder.uint32(this.height);
+      }
+      if (this.txindex != 0) {
+        encoder.uint32(0x10);
+        encoder.uint32(this.txindex);
+      }
+
+      return buf;
+    } // encode RuneId
+  } // RuneId
+
   export class Outpoint {
     public txid: Array<u8> = new Array<u8>();
     public vout: u32;
@@ -749,6 +821,8 @@ export namespace protorune {
 } // protorune
 export namespace quorum {
   export class RuneRange {
+    public totalSupply: Array<u8> = new Array<u8>();
+
     // Decodes RuneRange from an ArrayBuffer
     static decode(buf: ArrayBuffer): RuneRange {
       return RuneRange.decodeDataView(new DataView(buf));
@@ -764,6 +838,11 @@ export namespace quorum {
         const number = tag >>> 3;
 
         switch (number) {
+          case 1: {
+            obj.totalSupply = decoder.bytes();
+            break;
+          }
+
           default:
             decoder.skipType(tag & 7);
             break;
@@ -775,6 +854,13 @@ export namespace quorum {
 
     public size(): u32 {
       let size: u32 = 0;
+
+      size +=
+        this.totalSupply.length > 0
+          ? 1 +
+            __proto.Sizer.varint64(this.totalSupply.length) +
+            this.totalSupply.length
+          : 0;
 
       return size;
     }
@@ -792,12 +878,19 @@ export namespace quorum {
     ): Array<u8> {
       const buf = encoder.buf;
 
+      if (this.totalSupply.length > 0) {
+        encoder.uint32(0xa);
+        encoder.uint32(this.totalSupply.length);
+        encoder.bytes(this.totalSupply);
+      }
+
       return buf;
     } // encode RuneRange
   } // RuneRange
 
   export class RuneRangeInput {
     public outpoint: protorune.Outpoint = new protorune.Outpoint();
+    public rune: protorune.RuneId = new protorune.RuneId();
 
     // Decodes RuneRangeInput from an ArrayBuffer
     static decode(buf: ArrayBuffer): RuneRangeInput {
@@ -817,6 +910,19 @@ export namespace quorum {
           case 1: {
             const length = decoder.uint32();
             obj.outpoint = protorune.Outpoint.decodeDataView(
+              new DataView(
+                decoder.view.buffer,
+                decoder.pos + decoder.view.byteOffset,
+                length
+              )
+            );
+            decoder.skip(length);
+
+            break;
+          }
+          case 2: {
+            const length = decoder.uint32();
+            obj.rune = protorune.RuneId.decodeDataView(
               new DataView(
                 decoder.view.buffer,
                 decoder.pos + decoder.view.byteOffset,
@@ -849,6 +955,15 @@ export namespace quorum {
         }
       }
 
+      if (this.rune != null) {
+        const f: protorune.RuneId = this.rune as protorune.RuneId;
+        const messageSize = f.size();
+
+        if (messageSize > 0) {
+          size += 1 + __proto.Sizer.varint64(messageSize) + messageSize;
+        }
+      }
+
       return size;
     }
 
@@ -872,6 +987,18 @@ export namespace quorum {
 
         if (messageSize > 0) {
           encoder.uint32(0xa);
+          encoder.uint32(messageSize);
+          f.encodeU8Array(encoder);
+        }
+      }
+
+      if (this.rune != null) {
+        const f = this.rune as protorune.RuneId;
+
+        const messageSize = f.size();
+
+        if (messageSize > 0) {
+          encoder.uint32(0x12);
           encoder.uint32(messageSize);
           f.encodeU8Array(encoder);
         }

@@ -8,12 +8,16 @@ function numberToBytes(num: bigint): Uint8Array {
   return bytes;
 }
 
-export function encodeRuneRangeInput(outpoint: { tx: string; vout: number }) {
+export function encodeRuneRangeInput(
+  outpoint: { tx: string; vout: number },
+  runeId: { height: number; txindex: number },
+) {
   const input: RuneRangeInput = {
     outpoint: {
       txid: Buffer.from(outpoint.tx, "hex"),
       vout: outpoint.vout,
     },
+    rune: runeId,
   };
   return "0x" + Buffer.from(RuneRangeInput.toBinary(input)).toString("hex");
 }

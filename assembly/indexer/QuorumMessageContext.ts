@@ -48,7 +48,6 @@ export class QuorumMessageContext extends MessageContext {
   @inline
   protocolTag(): u128 {
     const tag = u128.from("20000024");
-    console.log(tag.toString());
     return tag;
   }
   proposal(): ArrayBuffer {

@@ -1,20 +1,12 @@
 import { BSTU128 } from "metashrew-as/assembly/indexer/widebst";
 import { u128 } from "as-bignum/assembly";
-import { Protostone } from "protorune/assembly/indexer/Protostone";
-import { RunestoneMessage } from "metashrew-runes/assembly/indexer/RunestoneMessage";
 import { RunesTransaction } from "metashrew-runes/assembly/indexer/RunesTransaction";
 import { RuneSource } from "./RuneSource";
 import { RuneId } from "metashrew-runes/assembly/indexer/RuneId";
 import { BalanceSheet } from "metashrew-runes/assembly/indexer/BalanceSheet";
-import { Edict } from "metashrew-runes/assembly/indexer/Edict";
-import {
-  OutPoint,
-  Input,
-  Output,
-} from "metashrew-as/assembly/blockdata/transaction";
-import { primitiveToBuffer } from "metashrew-as/assembly/utils";
-import { toArrayBuffer, fromArrayBuffer } from "metashrew-runes/assembly/utils";
-import { OUTPOINT_TO_RUNE_RANGES, RUNE_TO_OUTPOINT } from "../tables";
+import { OutPoint, Input } from "metashrew-as/assembly/blockdata/transaction";
+import { fromArrayBuffer } from "metashrew-runes/assembly/utils";
+import { OUTPOINT_TO_RUNE_RANGES, RUNE_TO_OUTPOINT } from "../../tables";
 import { OUTPOINT_TO_RUNES } from "metashrew-runes/assembly/indexer/constants";
 import { Box } from "metashrew-as/assembly/utils/box";
 import {
@@ -25,16 +17,7 @@ import {
   RUNE_ID_TO_ETCHING,
 } from "metashrew-runes/assembly/indexer/constants";
 import { IndexPointer } from "metashrew-as/assembly/indexer/tables";
-
-export function flatten<T>(ary: Array<Array<T>>): Array<T> {
-  const result = new Array<T>(0);
-  for (let i = 0; i < ary.length; i++) {
-    for (let j = 0; j < ary[i].length; j++) {
-      result.push(ary[i][j]);
-    }
-  }
-  return result;
-}
+import { flatten } from "../../utils";
 
 class PointsReduce {
   public pointer: IndexPointer;
@@ -178,7 +161,7 @@ export class NumberingMixin {
   _fromImpl<S, T>(v: S): T {
     return changetype<T>(v);
   }
-  _updateForEdictHookImplProtocolTag<T>(
+  _updateForEdictHookImplProtocolTag<T extends WithSourceMap>(
     v: T,
     edictAmount: u128,
     edictOutput: u32,
@@ -194,7 +177,7 @@ export class NumberingMixin {
         protocolTag,
       );
   }
-  _updateForEdictHookImpl<T>(
+  _updateForEdictHookImpl<T extends WithSourceMap>(
     v: T,
     edictAmount: u128,
     edictOutput: u32,

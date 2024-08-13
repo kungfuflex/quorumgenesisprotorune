@@ -24,6 +24,7 @@ import { DEBUG_WASM } from "./general";
 import { IndexerProgram, IndexPointer } from "metashrew-test";
 import { constructProtostoneTx } from "protorune/tests/utils/protoburn";
 import { inspect } from "node:util";
+import { runerange } from "./utils/view-helpers";
 
 class RuneId {
   public height: number;
@@ -73,13 +74,32 @@ describe("QUORUM•GENESIS•PROTORUNE", () => {
   let program: IndexerProgram;
   before(async () => {
     program = buildProgram(DEBUG_WASM);
-    program.setBlockHeight(840000);
+    program.setBlockHeight(849236);
   });
   it("should test numbering on runestones", async () => {
-    let { runeId, block, output, refundOutput, input, premineAmount } =
-      await createProtoruneFixture(false);
+    let { runeId, output, block, refundOutput, input, premineAmount } =
+      await createProtoruneFixture(false, 210000000n, {
+        TEST_PROTOCOL_TAG,
+        runeId: {
+          block: 849236n,
+          tx: 298,
+        },
+        skip: 297,
+      });
     program.setBlock(block.toHex());
 
     await program.run("_start");
+    await runerange(
+      program,
+      {
+        tx:
+          block.transactions
+            ?.at(block.transactions?.length - 1)
+            ?.getHash()
+            .toString("hex") || "",
+        vout: 1,
+      },
+      { height: 849236, txindex: 298 },
+    );
   });
 });

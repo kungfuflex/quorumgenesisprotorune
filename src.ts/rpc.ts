@@ -11,10 +11,10 @@ const addHexPrefix = (s) => (s.substr(0, 2) === "0x" ? s : "0x" + s);
 let id = 0;
 
 export class QuorumRpc extends ProtorunesRpc {
-  async runerange({ outpoint }: any): Promise<{
+  async runerange({ outpoint, runeId }: any): Promise<{
     balances: RuneOutput[];
   }> {
-    const buffer = quorumwallet.encodeRuneRangeInput(outpoint);
+    const buffer = quorumwallet.encodeRuneRangeInput(outpoint, runeId);
     const byteString = await this._call({
       method: "runerange",
       input: buffer,
