@@ -101,7 +101,7 @@ export function sourceMapFromEtch(
     Box.from(rune).toHexString(),
     new RuneSource(
       BSTU128.at(RUNE_TO_OUTPOINT.select(rune)),
-      [],
+      [u128.from(0)],
       totalSupply(RuneId.fromBytes(rune)),
     ),
   );
@@ -135,11 +135,14 @@ export class NumberingMixin {
     protocolTag: u128,
   ): void {
     logArray(v.source.keys());
+    const outpoint = OutPoint.from(v.tx.txid(), edictOutput).toArrayBuffer();
+
+    console.log(Box.from(outpoint).toHexString());
     v.source
       .get(Box.from(runeId).toHexString())
       .pipeTo(
         OUTPOINT_TO_RUNE_RANGES.select(runeId),
-        OutPoint.from(v.tx.txid(), edictOutput).toArrayBuffer(),
+        outpoint,
         edictAmount,
         protocolTag,
       );

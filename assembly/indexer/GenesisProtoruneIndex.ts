@@ -33,6 +33,7 @@ export class GenesisProtoruneIndex extends Protorune<QuorumMessageContext> {
     const baseRunestone = tx.runestone();
     if (changetype<usize>(baseRunestone) === 0)
       return changetype<RunestoneMessage>(0);
+    console.log(i.toString());
     const unallocatedTo = baseRunestone.fields.has(Field.POINTER)
       ? fieldTo<u32>(baseRunestone.fields.get(Field.POINTER))
       : <u32>tx.defaultOutput();

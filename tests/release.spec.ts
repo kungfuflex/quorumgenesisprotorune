@@ -92,11 +92,7 @@ describe("QUORUM•GENESIS•PROTORUNE", () => {
     await runerange(
       program,
       {
-        tx:
-          block.transactions
-            ?.at(block.transactions?.length - 1)
-            ?.getHash()
-            .toString("hex") || "",
+        tx: block.transactions?.at(299)?.getId() || "",
         vout: 2,
       },
       { height: 849236, txindex: 298 },

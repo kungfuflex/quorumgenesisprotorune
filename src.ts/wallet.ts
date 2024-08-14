@@ -12,6 +12,7 @@ export function encodeRuneRangeInput(
   outpoint: { tx: string; vout: number },
   runeId: { height: number; txindex: number },
 ) {
+  console.log(outpoint);
   const input: RuneRangeInput = {
     outpoint: {
       txid: Buffer.from(outpoint.tx, "hex"),
