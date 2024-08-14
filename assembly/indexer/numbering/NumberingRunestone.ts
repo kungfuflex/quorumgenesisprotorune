@@ -4,11 +4,12 @@ import { RunesTransaction } from "metashrew-runes/assembly/indexer/RunesTransact
 import { RuneSource } from "./RuneSource";
 import { BalanceSheet } from "metashrew-runes/assembly/indexer/BalanceSheet";
 import { NumberingMixin } from "./NumberingMixin";
-import { mixin } from "../../utils";
+import { logArray, mixin } from "../../utils";
 
 export class NumberingRunestone extends RunestoneMessage {
   public source: Map<string, RuneSource>;
   public tx: RunesTransaction;
+  public unallocatedTo: i32 = 0;
   _setTransaction(tx: RunesTransaction): NumberingRunestone {
     mixin<NumberingMixin>()._setTransactionImpl<NumberingRunestone>(this, tx);
     return this;
@@ -33,6 +34,37 @@ export class NumberingRunestone extends RunestoneMessage {
       edictOutput,
       runeId,
     );
+  }
+  mint(height: u32, balanceSheet: BalanceSheet): bool {
+    const hasMinted = super.mint(height, balanceSheet);
+    if (hasMinted) {
+      //@TODO: hook into mint as well for count
+    }
+    return hasMinted;
+  }
+  etch(
+    height: u64,
+    tx: u32,
+    initialBalanceSheet: BalanceSheet,
+    transaction: RunesTransaction,
+  ): bool {
+    const runeId = this.buildRuneId(height, tx);
+    const hasEtched = super.etch(height, tx, initialBalanceSheet, transaction);
+    if (hasEtched) {
+      const amount = initialBalanceSheet.has(runeId)
+        ? initialBalanceSheet.get(runeId)
+        : u128.Zero;
+      if (amount != u128.Zero) {
+        mixin<NumberingMixin>()._etchHook(this, runeId);
+        mixin<NumberingMixin>()._updateForEdictHookImpl(
+          this,
+          amount,
+          this.unallocatedTo,
+          runeId,
+        );
+      }
+    }
+    return hasEtched;
   }
   constructor(fields: Map<u64, Array<u128>>, edicts: Array<StaticArray<u128>>) {
     super(fields, edicts);

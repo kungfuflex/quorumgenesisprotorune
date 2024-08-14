@@ -75,25 +75,37 @@ export function sourceMapFromTransaction(
       balanceSheets.map<Array<ArrayBuffer>>((v: BalanceSheet) => v.runes),
     ),
   );
-  return allRunes.reduce(
-    (r: SourceMapReduce, v: ArrayBuffer, i: i32, ary: Array<ArrayBuffer>) => {
-      r.output.set(
-        Box.from(v).toHexString(),
-        new RuneSource(
-          BSTU128.at(RUNE_TO_OUTPOINT.select(v)),
-          pointsFromKeys(
-            v,
-            r.tx.ins.map<ArrayBuffer>((v: Input, i: i32, ary: Array<Input>) =>
-              v.previousOutput().toArrayBuffer(),
-            ),
+  return allRunes.reduce((r: SourceMapReduce, v: ArrayBuffer) => {
+    r.output.set(
+      Box.from(v).toHexString(),
+      new RuneSource(
+        BSTU128.at(RUNE_TO_OUTPOINT.select(v)),
+        pointsFromKeys(
+          v,
+          r.tx.ins.map<ArrayBuffer>((v: Input) =>
+            v.previousOutput().toArrayBuffer(),
           ),
-          totalSupply(RuneId.fromBytes(v)),
         ),
-      );
-      return r;
-    },
-    SourceMapReduce.from(tx),
-  ).output;
+        totalSupply(RuneId.fromBytes(v)),
+      ),
+    );
+    return r;
+  }, SourceMapReduce.from(tx)).output;
+}
+
+export function sourceMapFromEtch(
+  map: Map<string, RuneSource>,
+  rune: ArrayBuffer,
+): Map<string, RuneSource> {
+  map.set(
+    Box.from(rune).toHexString(),
+    new RuneSource(
+      BSTU128.at(RUNE_TO_OUTPOINT.select(rune)),
+      [],
+      totalSupply(RuneId.fromBytes(rune)),
+    ),
+  );
+  return map;
 }
 
 export class WithSourceMap {
@@ -108,6 +120,10 @@ export class NumberingMixin {
     v.source = sourceMapFromTransaction(tx);
     return v;
   }
+  _etchHook<T extends WithSourceMap>(v: T, rune: ArrayBuffer): T {
+    v.source = sourceMapFromEtch(v.source, rune);
+    return v;
+  }
   _fromImpl<S, T>(v: S): T {
     return changetype<T>(v);
   }
@@ -119,7 +135,6 @@ export class NumberingMixin {
     protocolTag: u128,
   ): void {
     logArray(v.source.keys());
-    console.log(Box.from(runeId).toHexString());
     v.source
       .get(Box.from(runeId).toHexString())
       .pipeTo(
@@ -135,7 +150,8 @@ export class NumberingMixin {
     edictOutput: u32,
     runeId: ArrayBuffer,
   ): void {
-    this._updateForEdictHookImplProtocolTag<T>(
+    console.log(edictAmount.toString() + ", output:" + edictOutput.toString());
+    mixin<NumberingMixin>()._updateForEdictHookImplProtocolTag<T>(
       v,
       edictAmount,
       edictOutput,

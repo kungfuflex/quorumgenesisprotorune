@@ -97,7 +97,7 @@ describe("QUORUM•GENESIS•PROTORUNE", () => {
             ?.at(block.transactions?.length - 1)
             ?.getHash()
             .toString("hex") || "",
-        vout: 1,
+        vout: 2,
       },
       { height: 849236, txindex: 298 },
     );

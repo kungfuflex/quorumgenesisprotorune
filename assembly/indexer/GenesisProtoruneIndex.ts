@@ -36,8 +36,8 @@ export class GenesisProtoruneIndex extends Protorune<QuorumMessageContext> {
     const unallocatedTo = baseRunestone.fields.has(Field.POINTER)
       ? fieldTo<u32>(baseRunestone.fields.get(Field.POINTER))
       : <u32>tx.defaultOutput();
-    console.log(i.toString());
     const runestone = NumberingRunestone.fromProtocolMessage(baseRunestone, tx);
+    runestone.unallocatedTo = unallocatedTo;
     const balancesByOutput = changetype<Map<u32, ProtoruneBalanceSheet>>(
       runestone.process(tx, txid, height, i),
     );
