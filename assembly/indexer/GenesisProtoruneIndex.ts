@@ -50,6 +50,7 @@ export class GenesisProtoruneIndex extends Protorune<QuorumMessageContext> {
     const runestoneOutputIndex = tx.runestoneOutputIndex();
     console.log("getting edicts");
     const edicts = Edict.fromDeltaSeries(runestone.edicts);
+
     if (burns.length > 0) {
       this.processProtoburns(
         unallocatedTo,

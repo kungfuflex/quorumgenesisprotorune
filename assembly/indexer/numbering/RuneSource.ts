@@ -19,7 +19,7 @@ export class RuneSource {
     for (let i: i32 = 0; i < points.length; i++) {
       this.distances[i] = min(table.seekGreater(points[0]), limit);
     }
-    logArray(this.distances);
+    logArray(this.distances, "DISTANCES");
   }
   pull(): RuneSource {
     return this.points.reduce(

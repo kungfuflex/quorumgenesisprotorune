@@ -71,9 +71,16 @@ class Stringifiable {
   }
 }
 
-export function logArray<T extends Stringifiable>(ary: Array<T>): void {
+export function logArray<T extends Stringifiable>(ary: Array<T>, title: string = ""): void {
+  console.log("-------------------------------------------------------------------")
+  if(title.length > 0) console.log(title)
   console.log("Logging array of type [" + nameof<T>()+"] and length: " + ary.length.toString());
+  console.log("[")
+  let str = ""
   for (let i = 0; i < ary.length; i++) {
-    console.log("[" + i.toString() + "]: " + ary[i].toString());
+    str +="\n\t" + "[" + i.toString() + "]: " + ary[i].toString();
   }
+  console.log(str)
+  console.log("]")
+  console.log("-------------------------------------------------------------------")
 }

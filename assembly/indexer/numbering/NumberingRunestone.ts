@@ -9,7 +9,6 @@ import { logArray, mixin } from "../../utils";
 export class NumberingRunestone extends RunestoneMessage {
   public source: Map<string, RuneSource>;
   public tx: RunesTransaction;
-  public unallocatedTo: i32 = 0;
   _setTransaction(tx: RunesTransaction): NumberingRunestone {
     mixin<NumberingMixin>()._setTransactionImpl<NumberingRunestone>(this, tx);
     return this;
@@ -66,8 +65,12 @@ export class NumberingRunestone extends RunestoneMessage {
     }
     return hasEtched;
   }
-  constructor(fields: Map<u64, Array<u128>>, edicts: Array<StaticArray<u128>>) {
-    super(fields, edicts);
+  constructor(
+    fields: Map<u64, Array<u128>>,
+    edicts: Array<StaticArray<u128>>,
+    defaultOutput: i32,
+  ) {
+    super(fields, edicts, defaultOutput);
     this.source = changetype<Map<string, RuneSource>>(0);
     this.tx = changetype<RunesTransaction>(0);
   }
@@ -81,9 +84,27 @@ export class NumberingRunestone extends RunestoneMessage {
     stone: RunestoneMessage,
     tx: RunesTransaction,
   ): NumberingRunestone {
-    return new NumberingRunestone(stone.fields, stone.edicts)._setTransaction(
-      tx,
-    );
+    return new NumberingRunestone(
+      stone.fields,
+      stone.edicts,
+      tx.defaultOutput(),
+    )._setTransaction(tx);
+  }
+  handleLeftoverRunes(
+    balanceSheet: BalanceSheet,
+    balancesByOutput: Map<u32, BalanceSheet>,
+  ): void {
+    super.handleLeftoverRunes(balanceSheet, balancesByOutput);
+    for (let i = 0; i < balanceSheet.runes.length; i++) {
+      const rune = balanceSheet.runes[i];
+      const amount = balanceSheet.get(rune);
+      mixin<NumberingMixin>()._updateForEdictHookImpl(
+        this,
+        amount,
+        this.unallocatedTo,
+        rune,
+      );
+    }
   }
   static from<T extends RunestoneMessage>(v: T): NumberingRunestone {
     return mixin<NumberingMixin>()._fromImpl<

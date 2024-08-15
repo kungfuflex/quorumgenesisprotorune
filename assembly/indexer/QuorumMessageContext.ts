@@ -72,7 +72,7 @@ export class QuorumMessageContext extends MessageContext {
     return u128.from(10000);
   }
   handle(): boolean {
-    const action = RunestoneMessage.parse(this.calldata);
+    const action = RunestoneMessage.parse(this.calldata, 0);
     if (action.fields.has(QuorumField.PROPOSAL)) {
       const incomingGenesis: IncomingRune = findIncomingGenesisProtorune(
         this.runes,

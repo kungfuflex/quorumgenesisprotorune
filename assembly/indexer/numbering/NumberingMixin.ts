@@ -43,7 +43,6 @@ export function pointsFromKeys(
       PointsReduce.from(OUTPOINT_TO_RUNE_RANGES.select(runeId)),
     ).output,
   );
-  logArray(res);
   return res;
 }
 
@@ -134,18 +133,15 @@ export class NumberingMixin {
     runeId: ArrayBuffer,
     protocolTag: u128,
   ): void {
-    logArray(v.source.keys());
     const outpoint = OutPoint.from(v.tx.txid(), edictOutput).toArrayBuffer();
-
-    console.log(Box.from(outpoint).toHexString());
-    v.source
-      .get(Box.from(runeId).toHexString())
-      .pipeTo(
-        OUTPOINT_TO_RUNE_RANGES.select(runeId),
-        outpoint,
-        edictAmount,
-        protocolTag,
-      );
+    const source = v.source.get(Box.from(runeId).toHexString()).pull();
+    logArray(source.points, "POINTS");
+    source.pipeTo(
+      OUTPOINT_TO_RUNE_RANGES.select(runeId),
+      outpoint,
+      edictAmount,
+      protocolTag,
+    );
   }
   _updateForEdictHookImpl<T extends WithSourceMap>(
     v: T,
