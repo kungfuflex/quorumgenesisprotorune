@@ -4,7 +4,7 @@ import { RunesTransaction } from "metashrew-runes/assembly/indexer/RunesTransact
 import { RuneSource } from "./RuneSource";
 import { BalanceSheet } from "metashrew-runes/assembly/indexer/BalanceSheet";
 import { NumberingMixin } from "./NumberingMixin";
-import { logArray, mixin } from "../../utils";
+import { mixin } from "../../utils";
 
 export class NumberingRunestone extends RunestoneMessage {
   public source: Map<string, RuneSource>;

@@ -4,10 +4,16 @@ import "protorune.proto";
 
 package quorum;
 
+message Range {
+  bytes start = 1;
+  bytes end = 2;
+}
+
 message RuneRange {
     bytes totalSupply = 1;
+    repeated Range ranges = 2;
 }
 message RuneRangeInput {
-    protorune.Outpoint outpoint = 1;
+    repeated protorune.Outpoint outpoints = 1;
     protorune.RuneId rune = 2;
 }

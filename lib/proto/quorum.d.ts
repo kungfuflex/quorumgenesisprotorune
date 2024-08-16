@@ -7,6 +7,19 @@ import { MessageType } from "@protobuf-ts/runtime";
 import { RuneId } from "./protorune";
 import { Outpoint } from "./protorune";
 /**
+ * @generated from protobuf message quorum.Range
+ */
+export interface Range {
+    /**
+     * @generated from protobuf field: bytes start = 1;
+     */
+    start: Uint8Array;
+    /**
+     * @generated from protobuf field: bytes end = 2;
+     */
+    end: Uint8Array;
+}
+/**
  * @generated from protobuf message quorum.RuneRange
  */
 export interface RuneRange {
@@ -14,20 +27,34 @@ export interface RuneRange {
      * @generated from protobuf field: bytes totalSupply = 1;
      */
     totalSupply: Uint8Array;
+    /**
+     * @generated from protobuf field: repeated quorum.Range ranges = 2;
+     */
+    ranges: Range[];
 }
 /**
  * @generated from protobuf message quorum.RuneRangeInput
  */
 export interface RuneRangeInput {
     /**
-     * @generated from protobuf field: protorune.Outpoint outpoint = 1;
+     * @generated from protobuf field: repeated protorune.Outpoint outpoints = 1;
      */
-    outpoint?: Outpoint;
+    outpoints: Outpoint[];
     /**
      * @generated from protobuf field: protorune.RuneId rune = 2;
      */
     rune?: RuneId;
 }
+declare class Range$Type extends MessageType<Range> {
+    constructor();
+    create(value?: PartialMessage<Range>): Range;
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: Range): Range;
+    internalBinaryWrite(message: Range, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter;
+}
+/**
+ * @generated MessageType for protobuf message quorum.Range
+ */
+export declare const Range: Range$Type;
 declare class RuneRange$Type extends MessageType<RuneRange> {
     constructor();
     create(value?: PartialMessage<RuneRange>): RuneRange;

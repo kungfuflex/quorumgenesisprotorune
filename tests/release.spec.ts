@@ -89,13 +89,20 @@ describe("QUORUM•GENESIS•PROTORUNE", () => {
     program.setBlock(block.toHex());
 
     await program.run("_start");
-    await runerange(
+    const ranges = await runerange(
       program,
-      {
-        tx: block.transactions?.at(299)?.getId() || "",
-        vout: 2,
-      },
+      [
+        {
+          tx: block.transactions?.at(299)?.getId() || "",
+          vout: 1,
+        },
+        {
+          tx: block.transactions?.at(299)?.getId() || "",
+          vout: 0,
+        },
+      ],
       { height: 849236, txindex: 298 },
     );
+    console.log(ranges);
   });
 });

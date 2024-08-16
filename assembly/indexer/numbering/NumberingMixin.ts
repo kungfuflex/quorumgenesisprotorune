@@ -10,8 +10,7 @@ import { OUTPOINT_TO_RUNE_RANGES, RUNE_TO_OUTPOINT } from "../../tables";
 import { OUTPOINT_TO_RUNES } from "metashrew-runes/assembly/indexer/constants";
 import { Box } from "metashrew-as/assembly/utils/box";
 import { IndexPointer } from "metashrew-as/assembly/indexer/tables";
-import { flatten, logArray, mixin, totalSupply, uniq } from "../../utils";
-import { console } from "metashrew-as/assembly/utils";
+import { flatten, mixin, totalSupply, uniq } from "../../utils";
 
 class PointsReduce {
   public pointer: IndexPointer;
@@ -135,7 +134,6 @@ export class NumberingMixin {
   ): void {
     const outpoint = OutPoint.from(v.tx.txid(), edictOutput).toArrayBuffer();
     const source = v.source.get(Box.from(runeId).toHexString()).pull();
-    logArray(source.points, "POINTS");
     source.pipeTo(
       OUTPOINT_TO_RUNE_RANGES.select(runeId),
       outpoint,
@@ -149,7 +147,6 @@ export class NumberingMixin {
     edictOutput: u32,
     runeId: ArrayBuffer,
   ): void {
-    console.log(edictAmount.toString() + ", output:" + edictOutput.toString());
     mixin<NumberingMixin>()._updateForEdictHookImplProtocolTag<T>(
       v,
       edictAmount,

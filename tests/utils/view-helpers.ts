@@ -4,10 +4,10 @@ import { QuorumRpc } from "../../src.ts/rpc";
 
 export const runerange = async (
   program: IndexerProgram,
-  outpoint: {
+  outpoints: {
     tx: string;
     vout: number;
-  },
+  }[],
   runeId: {
     height: number;
     txindex: number;
@@ -22,7 +22,7 @@ export const runerange = async (
         return readArrayBufferAsHex(cloned.memory, ptr);
       },
     },
-    { outpoint, runeId },
+    { outpoints, runeId },
   );
   return result;
 };

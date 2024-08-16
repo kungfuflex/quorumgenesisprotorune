@@ -820,8 +820,89 @@ export namespace protorune {
   } // Outpoint
 } // protorune
 export namespace quorum {
+  export class Range {
+    public start: Array<u8> = new Array<u8>();
+    public end: Array<u8> = new Array<u8>();
+
+    // Decodes Range from an ArrayBuffer
+    static decode(buf: ArrayBuffer): Range {
+      return Range.decodeDataView(new DataView(buf));
+    }
+
+    // Decodes Range from a DataView
+    static decodeDataView(view: DataView): Range {
+      const decoder = new __proto.SafeDecoder(view);
+      const obj = new Range();
+
+      while (!decoder.eof()) {
+        const tag = decoder.tag();
+        const number = tag >>> 3;
+
+        switch (number) {
+          case 1: {
+            obj.start = decoder.bytes();
+            break;
+          }
+          case 2: {
+            obj.end = decoder.bytes();
+            break;
+          }
+
+          default:
+            decoder.skipType(tag & 7);
+            break;
+        }
+      }
+      if (decoder.invalid()) return changetype<Range>(0);
+      return obj;
+    } // decode Range
+
+    public size(): u32 {
+      let size: u32 = 0;
+
+      size +=
+        this.start.length > 0
+          ? 1 + __proto.Sizer.varint64(this.start.length) + this.start.length
+          : 0;
+      size +=
+        this.end.length > 0
+          ? 1 + __proto.Sizer.varint64(this.end.length) + this.end.length
+          : 0;
+
+      return size;
+    }
+
+    // Encodes Range to the ArrayBuffer
+    encode(): ArrayBuffer {
+      return changetype<ArrayBuffer>(
+        StaticArray.fromArray<u8>(this.encodeU8Array())
+      );
+    }
+
+    // Encodes Range to the Array<u8>
+    encodeU8Array(
+      encoder: __proto.Encoder = new __proto.Encoder(new Array<u8>())
+    ): Array<u8> {
+      const buf = encoder.buf;
+
+      if (this.start.length > 0) {
+        encoder.uint32(0xa);
+        encoder.uint32(this.start.length);
+        encoder.bytes(this.start);
+      }
+      if (this.end.length > 0) {
+        encoder.uint32(0x12);
+        encoder.uint32(this.end.length);
+        encoder.bytes(this.end);
+      }
+
+      return buf;
+    } // encode Range
+  } // Range
+
   export class RuneRange {
     public totalSupply: Array<u8> = new Array<u8>();
+    public ranges: Array<Range> = new Array<Range>();
 
     // Decodes RuneRange from an ArrayBuffer
     static decode(buf: ArrayBuffer): RuneRange {
@@ -840,6 +921,21 @@ export namespace quorum {
         switch (number) {
           case 1: {
             obj.totalSupply = decoder.bytes();
+            break;
+          }
+          case 2: {
+            const length = decoder.uint32();
+            obj.ranges.push(
+              Range.decodeDataView(
+                new DataView(
+                  decoder.view.buffer,
+                  decoder.pos + decoder.view.byteOffset,
+                  length
+                )
+              )
+            );
+            decoder.skip(length);
+
             break;
           }
 
@@ -861,6 +957,14 @@ export namespace quorum {
             __proto.Sizer.varint64(this.totalSupply.length) +
             this.totalSupply.length
           : 0;
+
+      for (let n: i32 = 0; n < this.ranges.length; n++) {
+        const messageSize = this.ranges[n].size();
+
+        if (messageSize > 0) {
+          size += 1 + __proto.Sizer.varint64(messageSize) + messageSize;
+        }
+      }
 
       return size;
     }
@@ -884,12 +988,23 @@ export namespace quorum {
         encoder.bytes(this.totalSupply);
       }
 
+      for (let n: i32 = 0; n < this.ranges.length; n++) {
+        const messageSize = this.ranges[n].size();
+
+        if (messageSize > 0) {
+          encoder.uint32(0x12);
+          encoder.uint32(messageSize);
+          this.ranges[n].encodeU8Array(encoder);
+        }
+      }
+
       return buf;
     } // encode RuneRange
   } // RuneRange
 
   export class RuneRangeInput {
-    public outpoint: protorune.Outpoint = new protorune.Outpoint();
+    public outpoints: Array<protorune.Outpoint> =
+      new Array<protorune.Outpoint>();
     public rune: protorune.RuneId = new protorune.RuneId();
 
     // Decodes RuneRangeInput from an ArrayBuffer
@@ -909,11 +1024,13 @@ export namespace quorum {
         switch (number) {
           case 1: {
             const length = decoder.uint32();
-            obj.outpoint = protorune.Outpoint.decodeDataView(
-              new DataView(
-                decoder.view.buffer,
-                decoder.pos + decoder.view.byteOffset,
-                length
+            obj.outpoints.push(
+              protorune.Outpoint.decodeDataView(
+                new DataView(
+                  decoder.view.buffer,
+                  decoder.pos + decoder.view.byteOffset,
+                  length
+                )
               )
             );
             decoder.skip(length);
@@ -946,9 +1063,8 @@ export namespace quorum {
     public size(): u32 {
       let size: u32 = 0;
 
-      if (this.outpoint != null) {
-        const f: protorune.Outpoint = this.outpoint as protorune.Outpoint;
-        const messageSize = f.size();
+      for (let n: i32 = 0; n < this.outpoints.length; n++) {
+        const messageSize = this.outpoints[n].size();
 
         if (messageSize > 0) {
           size += 1 + __proto.Sizer.varint64(messageSize) + messageSize;
@@ -980,15 +1096,13 @@ export namespace quorum {
     ): Array<u8> {
       const buf = encoder.buf;
 
-      if (this.outpoint != null) {
-        const f = this.outpoint as protorune.Outpoint;
-
-        const messageSize = f.size();
+      for (let n: i32 = 0; n < this.outpoints.length; n++) {
+        const messageSize = this.outpoints[n].size();
 
         if (messageSize > 0) {
           encoder.uint32(0xa);
           encoder.uint32(messageSize);
-          f.encodeU8Array(encoder);
+          this.outpoints[n].encodeU8Array(encoder);
         }
       }
 
