@@ -11,6 +11,7 @@ import { OUTPOINT_TO_RUNES } from "metashrew-runes/assembly/indexer/constants";
 import { Box } from "metashrew-as/assembly/utils/box";
 import { IndexPointer } from "metashrew-as/assembly/indexer/tables";
 import { flatten, mixin, totalSupply, uniq } from "../../utils";
+import { Rune } from "../Rune";
 
 class PointsReduce {
   public pointer: IndexPointer;
@@ -105,6 +106,28 @@ export function sourceMapFromEtch(
   );
   return map;
 }
+export function updateSourceMapForMint(
+  map: Map<string, RuneSource>,
+  _rune: ArrayBuffer,
+): Map<string, RuneSource> {
+  const rune = new Rune(_rune);
+  const supply = rune.totalSupply();
+  const runeIdString = Box.from(_rune).toHexString();
+  let source: RuneSource;
+  if (map.has(runeIdString)) {
+    source = map.get(runeIdString);
+    source.points.push(supply - rune.amount);
+    source.refetch(supply);
+  } else {
+    source = new RuneSource(
+      BSTU128.at(RUNE_TO_OUTPOINT.select(_rune)),
+      [supply - rune.amount],
+      supply,
+    );
+  }
+  map.set(runeIdString, source);
+  return map;
+}
 
 export class WithSourceMap {
   public source: Map<string, RuneSource> =
@@ -120,6 +143,10 @@ export class NumberingMixin {
   }
   _etchHook<T extends WithSourceMap>(v: T, rune: ArrayBuffer): T {
     v.source = sourceMapFromEtch(v.source, rune);
+    return v;
+  }
+  _mintHook<T extends WithSourceMap>(v: T, rune: ArrayBuffer): T {
+    v.source = updateSourceMapForMint(v.source, rune);
     return v;
   }
   _fromImpl<S, T>(v: S): T {

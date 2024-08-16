@@ -59,9 +59,10 @@ export function totalSupply(runeId: RuneId): u128 {
   const mintsRemaining: u128 = fromArrayBuffer(
     MINTS_REMAINING.select(name).get(),
   );
-  if (mintsRemaining !== cap)
-    result +=
-      fromArrayBuffer(AMOUNT.select(name).get()) * (cap - mintsRemaining);
+  let numMints = cap
+  if(cap !== mintsRemaining) numMints = cap - mintsRemaining
+  //@ts-ignore
+  result += fromArrayBuffer(AMOUNT.select(name).get()) * (cap - mintsRemaining - 1);
   return result;
 }
 

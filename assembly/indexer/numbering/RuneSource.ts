@@ -16,7 +16,12 @@ export class RuneSource {
     this.index = 0;
     this.table = table;
     for (let i: i32 = 0; i < points.length; i++) {
-      this.distances[i] = min(table.seekGreater(points[0]), limit);
+      this.distances[i] = min(table.seekGreater(points[i]), limit);
+    }
+  }
+  refetch(limit: u128): void {
+    for (let i: i32 = 0; i < this.points.length; i++) {
+      this.distances[i] = min(this.table.seekGreater(this.points[i]), limit);
     }
   }
   pull(): RuneSource {

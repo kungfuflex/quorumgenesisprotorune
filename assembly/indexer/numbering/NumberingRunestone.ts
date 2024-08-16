@@ -5,6 +5,11 @@ import { RuneSource } from "./RuneSource";
 import { BalanceSheet } from "metashrew-runes/assembly/indexer/BalanceSheet";
 import { NumberingMixin } from "./NumberingMixin";
 import { mixin } from "../../utils";
+import {
+  AMOUNT,
+  RUNE_ID_TO_ETCHING,
+} from "metashrew-runes/assembly/indexer/constants";
+import { fromArrayBuffer } from "metashrew-runes/assembly/utils";
 
 export class NumberingRunestone extends RunestoneMessage {
   public source: Map<string, RuneSource>;
@@ -37,7 +42,7 @@ export class NumberingRunestone extends RunestoneMessage {
   mint(height: u32, balanceSheet: BalanceSheet): bool {
     const hasMinted = super.mint(height, balanceSheet);
     if (hasMinted) {
-      //@TODO: hook into mint as well for count
+      mixin<NumberingMixin>()._mintHook(this, this.mintTo());
     }
     return hasMinted;
   }
