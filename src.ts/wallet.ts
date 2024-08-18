@@ -10,7 +10,7 @@ function numberToBytes(num: bigint): Uint8Array {
 
 export function encodeRuneRangeInput(
   outpoints: { tx: string; vout: number }[],
-  runeId: { height: number; txindex: number },
+  runeId: { height: number; txindex: number }
 ) {
   const input: RuneRangeInput = {
     outpoints: outpoints.map((outpoint) => ({
@@ -24,11 +24,12 @@ export function encodeRuneRangeInput(
 
 export function decodeRuneRangeOutput(hex: string) {
   const result = RuneRange.fromBinary(Buffer.from(stripHexPrefix(hex), "hex"));
-  console.log(result);
-  const { ranges } = result;
-  const res = ranges.map((range) => ({
-    start: BigInt("0x" + Buffer.from(range.start).toString("hex")),
-    end: BigInt("0x" + Buffer.from(range.end).toString("hex")),
-  }));
+  const { ranges: completeRanges } = result;
+  const res = completeRanges.map((ranges) =>
+    ranges.ranges.map((range) => ({
+      start: BigInt("0x" + Buffer.from(range.start).toString("hex")),
+      end: BigInt("0x" + Buffer.from(range.end).toString("hex")),
+    }))
+  );
   return res;
 }

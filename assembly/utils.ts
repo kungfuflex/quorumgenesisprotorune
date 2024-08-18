@@ -62,7 +62,7 @@ export function totalSupply(runeId: RuneId): u128 {
   let numMints = cap
   if(cap !== mintsRemaining) numMints = cap - mintsRemaining
   //@ts-ignore
-  result += fromArrayBuffer(AMOUNT.select(name).get()) * (cap - mintsRemaining - 1);
+  result += fromArrayBuffer(AMOUNT.select(name).get()) * (numMints);
   return result;
 }
 
@@ -77,9 +77,9 @@ export function logArray<T extends Stringifiable>(ary: Array<T>, title: string =
   if(title.length > 0) console.log(title)
   console.log("Logging array of type [" + nameof<T>()+"] and length: " + ary.length.toString());
   console.log("[")
-  let str = ""
+  let str = "'"
   for (let i = 0; i < ary.length; i++) {
-    str +="\n\t" + "[" + i.toString() + "]: " + ary[i].toString();
+    str +="\n  " + "[" + i.toString() + "]: " + ary[i].toString();
   }
   console.log(str)
   console.log("]")

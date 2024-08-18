@@ -900,9 +900,93 @@ export namespace quorum {
     } // encode Range
   } // Range
 
+  export class RangeResult {
+    public ranges: Array<Range> = new Array<Range>();
+
+    // Decodes RangeResult from an ArrayBuffer
+    static decode(buf: ArrayBuffer): RangeResult {
+      return RangeResult.decodeDataView(new DataView(buf));
+    }
+
+    // Decodes RangeResult from a DataView
+    static decodeDataView(view: DataView): RangeResult {
+      const decoder = new __proto.SafeDecoder(view);
+      const obj = new RangeResult();
+
+      while (!decoder.eof()) {
+        const tag = decoder.tag();
+        const number = tag >>> 3;
+
+        switch (number) {
+          case 1: {
+            const length = decoder.uint32();
+            obj.ranges.push(
+              Range.decodeDataView(
+                new DataView(
+                  decoder.view.buffer,
+                  decoder.pos + decoder.view.byteOffset,
+                  length
+                )
+              )
+            );
+            decoder.skip(length);
+
+            break;
+          }
+
+          default:
+            decoder.skipType(tag & 7);
+            break;
+        }
+      }
+      if (decoder.invalid()) return changetype<RangeResult>(0);
+      return obj;
+    } // decode RangeResult
+
+    public size(): u32 {
+      let size: u32 = 0;
+
+      for (let n: i32 = 0; n < this.ranges.length; n++) {
+        const messageSize = this.ranges[n].size();
+
+        if (messageSize > 0) {
+          size += 1 + __proto.Sizer.varint64(messageSize) + messageSize;
+        }
+      }
+
+      return size;
+    }
+
+    // Encodes RangeResult to the ArrayBuffer
+    encode(): ArrayBuffer {
+      return changetype<ArrayBuffer>(
+        StaticArray.fromArray<u8>(this.encodeU8Array())
+      );
+    }
+
+    // Encodes RangeResult to the Array<u8>
+    encodeU8Array(
+      encoder: __proto.Encoder = new __proto.Encoder(new Array<u8>())
+    ): Array<u8> {
+      const buf = encoder.buf;
+
+      for (let n: i32 = 0; n < this.ranges.length; n++) {
+        const messageSize = this.ranges[n].size();
+
+        if (messageSize > 0) {
+          encoder.uint32(0xa);
+          encoder.uint32(messageSize);
+          this.ranges[n].encodeU8Array(encoder);
+        }
+      }
+
+      return buf;
+    } // encode RangeResult
+  } // RangeResult
+
   export class RuneRange {
     public totalSupply: Array<u8> = new Array<u8>();
-    public ranges: Array<Range> = new Array<Range>();
+    public ranges: Array<RangeResult> = new Array<RangeResult>();
 
     // Decodes RuneRange from an ArrayBuffer
     static decode(buf: ArrayBuffer): RuneRange {
@@ -926,7 +1010,7 @@ export namespace quorum {
           case 2: {
             const length = decoder.uint32();
             obj.ranges.push(
-              Range.decodeDataView(
+              RangeResult.decodeDataView(
                 new DataView(
                   decoder.view.buffer,
                   decoder.pos + decoder.view.byteOffset,

@@ -18,19 +18,19 @@ export class Rune {
     const name = RUNE_ID_TO_ETCHING.select(runeId).get();
     this.amount = fromArrayBuffer(AMOUNT.select(name).get());
     this.name = name;
-    this.cap = fromArrayBuffer(CAP.select(this.name).get());
-    this.premine = fromArrayBuffer(PREMINE.select(this.name).get());
+    this.cap = fromArrayBuffer(CAP.select(name).get());
+    this.premine = fromArrayBuffer(PREMINE.select(name).get());
   }
   totalSupply(): u128 {
     let result: u128 = this.premine;
     if (this.cap.isZero()) return result;
     const mintsRemaining: u128 = fromArrayBuffer(
-      MINTS_REMAINING.select(this.name).get(),
+      MINTS_REMAINING.select(this.name).get()
     );
     let numMints = this.cap;
     if (this.cap !== mintsRemaining) numMints = this.cap - mintsRemaining;
     //@ts-ignore
-    result += fromArrayBuffer(AMOUNT.select(name).get()) * numMints;
+    result += fromArrayBuffer(AMOUNT.select(this.name).get()) * numMints;
     return result;
   }
 }

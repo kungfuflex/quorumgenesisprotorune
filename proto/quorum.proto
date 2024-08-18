@@ -9,9 +9,13 @@ message Range {
   bytes end = 2;
 }
 
+message RangeResult {
+  repeated Range ranges = 1;
+}
+
 message RuneRange {
     bytes totalSupply = 1;
-    repeated Range ranges = 2;
+    repeated RangeResult ranges = 2;
 }
 message RuneRangeInput {
     repeated protorune.Outpoint outpoints = 1;

@@ -26,6 +26,15 @@ export interface Range {
     end: Uint8Array;
 }
 /**
+ * @generated from protobuf message quorum.RangeResult
+ */
+export interface RangeResult {
+    /**
+     * @generated from protobuf field: repeated quorum.Range ranges = 1;
+     */
+    ranges: Range[];
+}
+/**
  * @generated from protobuf message quorum.RuneRange
  */
 export interface RuneRange {
@@ -34,9 +43,9 @@ export interface RuneRange {
      */
     totalSupply: Uint8Array;
     /**
-     * @generated from protobuf field: repeated quorum.Range ranges = 2;
+     * @generated from protobuf field: repeated quorum.RangeResult ranges = 2;
      */
-    ranges: Range[];
+    ranges: RangeResult[];
 }
 /**
  * @generated from protobuf message quorum.RuneRangeInput
@@ -107,11 +116,58 @@ class Range$Type extends MessageType<Range> {
  */
 export const Range = new Range$Type();
 // @generated message type with reflection information, may provide speed optimized methods
+class RangeResult$Type extends MessageType<RangeResult> {
+    constructor() {
+        super("quorum.RangeResult", [
+            { no: 1, name: "ranges", kind: "message", repeat: 1 /*RepeatType.PACKED*/, T: () => Range }
+        ]);
+    }
+    create(value?: PartialMessage<RangeResult>): RangeResult {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.ranges = [];
+        if (value !== undefined)
+            reflectionMergePartial<RangeResult>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: RangeResult): RangeResult {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* repeated quorum.Range ranges */ 1:
+                    message.ranges.push(Range.internalBinaryRead(reader, reader.uint32(), options));
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: RangeResult, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* repeated quorum.Range ranges = 1; */
+        for (let i = 0; i < message.ranges.length; i++)
+            Range.internalBinaryWrite(message.ranges[i], writer.tag(1, WireType.LengthDelimited).fork(), options).join();
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message quorum.RangeResult
+ */
+export const RangeResult = new RangeResult$Type();
+// @generated message type with reflection information, may provide speed optimized methods
 class RuneRange$Type extends MessageType<RuneRange> {
     constructor() {
         super("quorum.RuneRange", [
             { no: 1, name: "totalSupply", kind: "scalar", T: 12 /*ScalarType.BYTES*/ },
-            { no: 2, name: "ranges", kind: "message", repeat: 1 /*RepeatType.PACKED*/, T: () => Range }
+            { no: 2, name: "ranges", kind: "message", repeat: 1 /*RepeatType.PACKED*/, T: () => RangeResult }
         ]);
     }
     create(value?: PartialMessage<RuneRange>): RuneRange {
@@ -130,8 +186,8 @@ class RuneRange$Type extends MessageType<RuneRange> {
                 case /* bytes totalSupply */ 1:
                     message.totalSupply = reader.bytes();
                     break;
-                case /* repeated quorum.Range ranges */ 2:
-                    message.ranges.push(Range.internalBinaryRead(reader, reader.uint32(), options));
+                case /* repeated quorum.RangeResult ranges */ 2:
+                    message.ranges.push(RangeResult.internalBinaryRead(reader, reader.uint32(), options));
                     break;
                 default:
                     let u = options.readUnknownField;
@@ -148,9 +204,9 @@ class RuneRange$Type extends MessageType<RuneRange> {
         /* bytes totalSupply = 1; */
         if (message.totalSupply.length)
             writer.tag(1, WireType.LengthDelimited).bytes(message.totalSupply);
-        /* repeated quorum.Range ranges = 2; */
+        /* repeated quorum.RangeResult ranges = 2; */
         for (let i = 0; i < message.ranges.length; i++)
-            Range.internalBinaryWrite(message.ranges[i], writer.tag(2, WireType.LengthDelimited).fork(), options).join();
+            RangeResult.internalBinaryWrite(message.ranges[i], writer.tag(2, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);

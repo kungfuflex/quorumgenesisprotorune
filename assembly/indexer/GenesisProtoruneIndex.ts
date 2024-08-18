@@ -9,11 +9,11 @@ import { NumberingRunestone, NumberingProtostone } from "./numbering";
 import { QuorumMessageContext } from "./QuorumMessageContext";
 import { Protorune } from "protorune/assembly/indexer";
 import { fieldTo } from "metashrew-runes/assembly/utils";
-import { console } from "metashrew-as/assembly/utils";
+import { console, encodeHexFromBuffer } from "metashrew-as/assembly/utils";
 
 function expandToNumberingAlign(
   v: Array<Protostone>,
-  tx: RunesTransaction,
+  tx: RunesTransaction
 ): Array<Protostone> {
   const result = new Array<Protostone>(0);
   for (let i = 0; i < v.length; i++) {
@@ -28,38 +28,35 @@ export class GenesisProtoruneIndex extends Protorune<QuorumMessageContext> {
     tx: RunesTransaction,
     txid: ArrayBuffer,
     height: u32,
-    i: u32,
+    i: u32
   ): RunestoneMessage {
     const baseRunestone = tx.runestone();
     if (changetype<usize>(baseRunestone) === 0)
       return changetype<RunestoneMessage>(0);
     console.log(i.toString());
-    const unallocatedTo = baseRunestone.fields.has(Field.POINTER)
-      ? fieldTo<u32>(baseRunestone.fields.get(Field.POINTER))
-      : <u32>tx.defaultOutput();
+    console.log(encodeHexFromBuffer(txid));
+    console.log(baseRunestone.unallocatedTo.toString());
     const runestone = NumberingRunestone.fromProtocolMessage(baseRunestone, tx);
-    runestone.unallocatedTo = unallocatedTo;
     const balancesByOutput = changetype<Map<u32, ProtoruneBalanceSheet>>(
-      runestone.process(tx, txid, height, i),
+      runestone.process(tx, txid, height, i)
     );
     const protostones = Protostone.from(runestone.unwrap()).protostones(
-      tx.outs.length + 1,
+      tx.outs.length + 1
     );
     const burns = protostones.burns();
 
     const runestoneOutputIndex = tx.runestoneOutputIndex();
-    console.log("getting edicts");
     const edicts = Edict.fromDeltaSeries(runestone.edicts);
 
     if (burns.length > 0) {
       this.processProtoburns(
-        unallocatedTo,
+        baseRunestone.unallocatedTo,
         balancesByOutput,
         txid,
         runestoneOutputIndex,
         Protostone.from(runestone.unwrap()),
         edicts,
-        burns,
+        burns
       );
     }
     this.processProtostones(protostones.flat(), block, height, tx, txid, i);

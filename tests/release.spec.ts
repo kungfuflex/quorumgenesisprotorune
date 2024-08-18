@@ -14,6 +14,7 @@ import {
   initCompleteBlockWithRuneEtching,
   runesbyaddress,
   transferRune,
+  mintRune,
 } from "metashrew-runes/lib/tests/utils/rune-helpers";
 import {
   buildCoinbaseToAddress,
@@ -60,11 +61,11 @@ const u32 = (v: number): string => {
 
 const etchRune = (kv: any, { runeId, name, premine, outpoint }: any) => {
   kv[concat(Buffer.from("/height/byruneid"), runeId.toBytes())] = u32(
-    runeId.height,
+    runeId.height
   );
   kv[concat(Buffer.from("/runeid/byetching/"), name)] = toHex(runeId.toBytes());
   kv[concat(Buffer.from("/etching/byruneid/"), runeId.toBytes())] = toHex(
-    Buffer.from(name),
+    Buffer.from(name)
   );
   kv[concat(Buffer.from("/runes/premine/"), Buffer.from(name))] =
     toHex(premine);
@@ -101,7 +102,40 @@ describe("QUORUM•GENESIS•PROTORUNE", () => {
           vout: 0,
         },
       ],
-      { height: 849236, txindex: 298 },
+      { height: 849236, txindex: 298 }
+    );
+    console.log(ranges);
+  });
+  it("should test numbering on mints", async () => {
+    let {
+      block: _block,
+      output,
+      refundOutput,
+      input,
+    } = await createProtoruneFixture(true);
+    program.setBlockHeight(840000);
+
+    const block = mintRune(
+      [input],
+      { block: 840000n, tx: 1 },
+      1,
+      [output, refundOutput],
+      _block
+    );
+
+    program.setBlock(block.toHex());
+    await program.run("_start");
+    const ranges = await runerange(
+      program,
+      [
+        {
+          tx:
+            block.transactions?.at(block.transactions?.length - 1)?.getId() ||
+            "",
+          vout: 1,
+        },
+      ],
+      { height: 840000, txindex: 1 }
     );
     console.log(ranges);
   });
