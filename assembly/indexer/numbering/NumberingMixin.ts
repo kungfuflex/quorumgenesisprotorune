@@ -8,6 +8,7 @@ import { OutPoint, Input } from "metashrew-as/assembly/blockdata/transaction";
 import { fromArrayBuffer } from "metashrew-runes/assembly/utils";
 import { OUTPOINT_TO_RUNE_RANGES, RUNE_TO_OUTPOINT } from "../../tables";
 import { OUTPOINT_TO_RUNES } from "metashrew-runes/assembly/indexer/constants";
+import { ProtoruneTable } from "protorune/assembly/indexer/tables/protorune";
 import { Box } from "metashrew-as/assembly/utils/box";
 import { IndexPointer } from "metashrew-as/assembly/indexer/tables";
 import { flatten, logArray, mixin, totalSupply, uniq } from "../../utils";
@@ -28,7 +29,8 @@ class PointsReduce {
 
 export function pointsFromKeys(
   runeId: ArrayBuffer,
-  ary: Array<ArrayBuffer>
+  ary: Array<ArrayBuffer>,
+  protocolId: u128,
 ): Array<u128> {
   const res = flatten<u128>(
     ary.reduce(
@@ -37,12 +39,14 @@ export function pointsFromKeys(
           r.pointer
             .select(v)
             .getList()
-            .map((v: ArrayBuffer) => fromArrayBuffer(v))
+            .map((v: ArrayBuffer) => fromArrayBuffer(v)),
         );
         return r;
       },
-      PointsReduce.from(OUTPOINT_TO_RUNE_RANGES.select(runeId))
-    ).output
+      PointsReduce.from(
+        OUTPOINT_TO_RUNE_RANGES.keyword(protocolId.toString()).select(runeId),
+      ),
+    ).output,
   );
   return res;
 }
@@ -60,34 +64,37 @@ class SourceMapReduce {
 }
 
 export function sourceMapFromTransaction(
-  tx: RunesTransaction
+  tx: RunesTransaction,
+  ptr: IndexPointer,
+  protocolId: u128,
 ): Map<string, RuneSource> {
   const inputs = tx.ins.map((v: Input, i: i32, ary: Array<Input>) =>
-    v.previousOutput()
+    v.previousOutput(),
   );
   const balanceSheets = inputs.map<BalanceSheet>(
     (v: OutPoint, i: i32, ary: Array<OutPoint>) => {
-      return BalanceSheet.load(OUTPOINT_TO_RUNES.select(v.toArrayBuffer()));
-    }
+      return BalanceSheet.load(ptr.select(v.toArrayBuffer()));
+    },
   );
   const allRunes = uniq(
     flatten<ArrayBuffer>(
-      balanceSheets.map<Array<ArrayBuffer>>((v: BalanceSheet) => v.runes)
-    )
+      balanceSheets.map<Array<ArrayBuffer>>((v: BalanceSheet) => v.runes),
+    ),
   );
   return allRunes.reduce((r: SourceMapReduce, v: ArrayBuffer) => {
     r.output.set(
       Box.from(v).toHexString(),
       new RuneSource(
-        BSTU128.at(RUNE_TO_OUTPOINT.select(v)),
+        BSTU128.at(RUNE_TO_OUTPOINT.keyword(protocolId.toString()).select(v)),
         pointsFromKeys(
           v,
           r.tx.ins.map<ArrayBuffer>((v: Input) =>
-            v.previousOutput().toArrayBuffer()
-          )
+            v.previousOutput().toArrayBuffer(),
+          ),
+          protocolId,
         ),
-        totalSupply(RuneId.fromBytes(v))
-      )
+        totalSupply(RuneId.fromBytes(v)),
+      ),
     );
     return r;
   }, SourceMapReduce.from(tx)).output;
@@ -95,21 +102,22 @@ export function sourceMapFromTransaction(
 
 export function sourceMapFromEtch(
   map: Map<string, RuneSource>,
-  rune: ArrayBuffer
+  rune: ArrayBuffer,
+  protocolId: u128,
 ): Map<string, RuneSource> {
   map.set(
     Box.from(rune).toHexString(),
     new RuneSource(
-      BSTU128.at(RUNE_TO_OUTPOINT.select(rune)),
+      BSTU128.at(RUNE_TO_OUTPOINT.keyword(protocolId.toString()).select(rune)),
       [u128.from(0)],
-      totalSupply(RuneId.fromBytes(rune))
-    )
+      totalSupply(RuneId.fromBytes(rune)),
+    ),
   );
   return map;
 }
 export function updateSourceMapForMint(
   map: Map<string, RuneSource>,
-  _rune: ArrayBuffer
+  _rune: ArrayBuffer,
 ): Map<string, RuneSource> {
   console.log("updating mint sourcemap");
   const rune = new Rune(_rune);
@@ -124,7 +132,7 @@ export function updateSourceMapForMint(
     source = new RuneSource(
       BSTU128.at(RUNE_TO_OUTPOINT.select(_rune)),
       [supply - rune.amount],
-      supply
+      supply,
     );
   }
   map.set(runeIdString, source);
@@ -139,12 +147,32 @@ export class WithSourceMap {
 
 export class NumberingMixin {
   _setTransactionImpl<T extends WithSourceMap>(v: T, tx: RunesTransaction): T {
+    return this._setTransactionImplProtocol(v, tx, u128.from(13));
+  }
+  _setTransactionImplProtocol<T extends WithSourceMap>(
+    v: T,
+    tx: RunesTransaction,
+    protocolId: u128,
+  ): T {
+    let ptr: IndexPointer;
+    if (protocolId == u128.from(13)) {
+      ptr = OUTPOINT_TO_RUNES;
+    } else {
+      ptr = ProtoruneTable.for(protocolId).OUTPOINT_TO_RUNES;
+    }
     v.tx = tx;
-    v.source = sourceMapFromTransaction(tx);
+    v.source = sourceMapFromTransaction(tx, ptr, protocolId);
     return v;
   }
   _etchHook<T extends WithSourceMap>(v: T, rune: ArrayBuffer): T {
-    v.source = sourceMapFromEtch(v.source, rune);
+    return this._etchHookProtocol(v, rune, u128.from("13"));
+  }
+  _etchHookProtocol<T extends WithSourceMap>(
+    v: T,
+    rune: ArrayBuffer,
+    protocolId: u128,
+  ): T {
+    v.source = sourceMapFromEtch(v.source, rune, protocolId);
     return v;
   }
   _mintHook<T extends WithSourceMap>(v: T, rune: ArrayBuffer): T {
@@ -159,29 +187,29 @@ export class NumberingMixin {
     edictAmount: u128,
     edictOutput: u32,
     runeId: ArrayBuffer,
-    protocolTag: u128
+    protocolTag: u128,
   ): void {
     const outpoint = OutPoint.from(v.tx.txid(), edictOutput).toArrayBuffer();
     const source = v.source.get(Box.from(runeId).toHexString()).pull();
     source.pipeTo(
-      OUTPOINT_TO_RUNE_RANGES.select(runeId),
+      OUTPOINT_TO_RUNE_RANGES.keyword(protocolTag.toString()).select(runeId),
       outpoint,
       edictAmount,
-      protocolTag
+      protocolTag,
     );
   }
   _updateForEdictHookImpl<T extends WithSourceMap>(
     v: T,
     edictAmount: u128,
     edictOutput: u32,
-    runeId: ArrayBuffer
+    runeId: ArrayBuffer,
   ): void {
     mixin<NumberingMixin>()._updateForEdictHookImplProtocolTag<T>(
       v,
       edictAmount,
       edictOutput,
       runeId,
-      u128.from(13)
+      u128.from(13),
     );
   }
 }

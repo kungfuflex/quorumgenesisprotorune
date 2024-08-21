@@ -41,8 +41,9 @@ export class NumberingProtostone extends Protostone {
     fields: Map<u64, Array<u128>>,
     edicts: Array<StaticArray<u128>>,
     protocolTag: u128,
+    defaultOutput: i32,
   ) {
-    super(fields, edicts, protocolTag);
+    super(fields, edicts, protocolTag, defaultOutput);
     this.source = changetype<Map<string, RuneSource>>(0);
     this.tx = changetype<RunesTransaction>(0);
   }
@@ -57,6 +58,7 @@ export class NumberingProtostone extends Protostone {
       stone.fields,
       stone.edicts,
       stone.protocolTag,
+      stone.unallocatedTo,
     )._setTransaction(tx);
   }
   static from<T extends Protostone>(v: T): NumberingProtostone {
