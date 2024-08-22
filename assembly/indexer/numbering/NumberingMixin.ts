@@ -206,6 +206,27 @@ export class NumberingMixin {
   _fromImpl<S, T>(v: S): T {
     return changetype<T>(v);
   }
+  _updateForProtoburn<T extends WithSourceMap>(
+    v: T,
+    runeId: ArrayBuffer,
+    pointer: u32,
+    protocolTag: u128,
+  ): T {
+    const txid = v.tx.txid();
+    const sourceOutpoint = OutPoint.from(
+      txid,
+      v.tx.runestoneOutputIndex(),
+    ).toArrayBuffer();
+    const targetOutpoint = OutPoint.from(txid, pointer).toArrayBuffer();
+    const source = v.source.get(Box.from(runeId).toHexString());
+    source.updateAndPreserve(
+      OUTPOINT_TO_RUNE_RANGES.select(runeId),
+      sourceOutpoint,
+      targetOutpoint,
+      protocolTag,
+    );
+    return v;
+  }
   _updateForEdictHookImplProtocolTag<T extends WithSourceMap>(
     v: T,
     edictAmount: u128,

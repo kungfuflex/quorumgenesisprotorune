@@ -52,9 +52,12 @@ export class GenesisProtoruneIndex extends Protorune<QuorumMessageContext> {
     const protostones = Protostone.from(runestone.unwrap()).protostones(
       tx.outs.length + 1,
     );
-    const burns = protostones
-      .burns()
-      .map<NumberingProtoburn>((b) => changetype<NumberingProtoburn>(b));
+    const _burns = protostones.burns();
+    const burns = new Array<NumberingProtoburn<NumberingRunestone>>();
+
+    for (let i = 0; i < _burns.length; i++) {
+      burns.push(NumberingProtoburn.fromBurn(_burns[i], runestone));
+    }
 
     const runestoneOutputIndex = tx.runestoneOutputIndex();
     const edicts = Edict.fromDeltaSeries(runestone.edicts);

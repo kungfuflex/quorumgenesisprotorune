@@ -1,7 +1,11 @@
 import { u128 } from "as-bignum/assembly";
 import { BSTU128 } from "metashrew-as/assembly/indexer/widebst";
 import { IndexPointer } from "metashrew-as/assembly/indexer/tables";
-import { min, toArrayBuffer } from "metashrew-runes/assembly/utils";
+import {
+  isEqualArrayBuffer,
+  min,
+  toArrayBuffer,
+} from "metashrew-runes/assembly/utils";
 import { console, encodeHexFromBuffer } from "metashrew-as/assembly/utils";
 
 export class RuneSource {
@@ -40,6 +44,26 @@ export class RuneSource {
       this.index === this.points.length - 1 &&
       this.offset >= this.distances[this.distances.length - 1]
     );
+  }
+  updateAndPreserve(
+    prefix: IndexPointer,
+    source: ArrayBuffer,
+    target: ArrayBuffer,
+    protocolTag: u128,
+  ): void {
+    const sourcePointer = prefix.select(source);
+    const targetPointer = prefix.select(target);
+    for (let i = 0; i < this.points.length; i++) {
+      const point = this.points[i];
+      if (isEqualArrayBuffer(this.table.get(point), source)) {
+        this.table.set(point, target);
+      }
+    }
+    sourcePointer.getList().reduce((ptr, v) => {
+      ptr.append(v);
+      return ptr;
+    }, targetPointer);
+    targetPointer.keyword("/protocol").set(toArrayBuffer(protocolTag));
   }
   pipeTo(
     prefix: IndexPointer,
