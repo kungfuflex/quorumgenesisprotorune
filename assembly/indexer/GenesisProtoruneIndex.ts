@@ -71,7 +71,9 @@ export class GenesisProtoruneIndex extends Protorune<QuorumMessageContext> {
       );
     }
     const stones = protostones.flat().reduce((reduce, stone) => {
-      reduce.stones.push(NumberingProtostone.fromProtocolMessage(stone, tx));
+      reduce.stones.push(
+        NumberingProtostone.fromProtocolMessage(stone, reduce.tx),
+      );
       return reduce;
     }, new ProtostoneReduce(tx)).stones;
     this.processProtostones(stones, block, height, tx, txid, i);

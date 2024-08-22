@@ -1,7 +1,7 @@
 import { u128 } from "as-bignum/assembly/integer";
 import { CAP, MINTS_REMAINING, PREMINE, RUNE_ID_TO_ETCHING, AMOUNT } from "metashrew-runes/assembly/indexer/constants";
 import { RuneId } from "metashrew-runes/assembly/indexer/RuneId";
-import { fromArrayBuffer } from "metashrew-runes/assembly/utils";
+import { fromArrayBuffer  } from "metashrew-runes/assembly/utils";
 import { console } from "metashrew-as/assembly/utils/logging"
 
 //@ts-ignore

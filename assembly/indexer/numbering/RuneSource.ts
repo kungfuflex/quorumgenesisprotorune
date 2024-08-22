@@ -2,6 +2,7 @@ import { u128 } from "as-bignum/assembly";
 import { BSTU128 } from "metashrew-as/assembly/indexer/widebst";
 import { IndexPointer } from "metashrew-as/assembly/indexer/tables";
 import { min, toArrayBuffer } from "metashrew-runes/assembly/utils";
+import { console, encodeHexFromBuffer } from "metashrew-as/assembly/utils";
 
 export class RuneSource {
   public points: Array<u128>;
@@ -54,11 +55,8 @@ export class RuneSource {
       const point = this.points[this.index] + this.offset;
       this.table.set(point, target);
       const keyBytes = toArrayBuffer(point);
-      this.table.ptr
-        .select(keyBytes)
-        .keyword("/protocol")
-        .set(toArrayBuffer(protocolTag));
-      pointer.append(toArrayBuffer(point));
+      pointer.keyword("/protocol").set(toArrayBuffer(protocolTag));
+      pointer.append(keyBytes);
       this.offset += valueToApply;
       remaining -= valueToApply;
       if (this.offset === this.distances[this.index]) {

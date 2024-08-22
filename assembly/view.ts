@@ -48,13 +48,15 @@ export function runerange(): ArrayBuffer {
     (reducer: OutpointReduce, o: protorune.Outpoint) => {
       const outpoint = OutPoint.from(
         changetype<Uint8Array>(o.txid).buffer,
-        o.vout
+        o.vout,
       );
       console.log(encodeHexFromBuffer(outpoint.toArrayBuffer()));
       const tree = BSTU128.at(RUNE_TO_OUTPOINT.select(reducer.rune.toBytes()));
-      const points = pointsFromKeys(reducer.rune.toBytes(), [
-        outpoint.toArrayBuffer(),
-      ]);
+      const points = pointsFromKeys(
+        reducer.rune.toBytes(),
+        [outpoint.toArrayBuffer()],
+        u128.from(13),
+      );
       if (points.length == 0) return reducer;
 
       const limit = totalSupply(reducer.rune);
@@ -73,7 +75,7 @@ export function runerange(): ArrayBuffer {
       reducer.ranges.push(allranges);
       return reducer;
     },
-    new OutpointReduce(inp.rune)
+    new OutpointReduce(inp.rune),
   ).ranges;
 
   const result = new quorum.RuneRange();
