@@ -11,6 +11,7 @@ export class NumberingProtoburn<T extends WithSourceMap> extends Protoburn {
       rune,
       this.pointer,
       this.protocolTag,
+      amount,
     );
   }
   static fromBurn<T extends WithSourceMap>(

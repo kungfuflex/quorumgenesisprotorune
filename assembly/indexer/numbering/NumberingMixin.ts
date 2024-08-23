@@ -211,6 +211,7 @@ export class NumberingMixin {
     runeId: ArrayBuffer,
     pointer: u32,
     protocolTag: u128,
+    amount: u128,
   ): T {
     const txid = v.tx.txid();
     const sourceOutpoint = OutPoint.from(
@@ -224,6 +225,7 @@ export class NumberingMixin {
       sourceOutpoint,
       targetOutpoint,
       protocolTag,
+      amount,
     );
     return v;
   }
@@ -233,6 +235,7 @@ export class NumberingMixin {
     edictOutput: u32,
     runeId: ArrayBuffer,
     protocolTag: u128,
+    savePoints: bool,
   ): void {
     const outpoint = OutPoint.from(v.tx.txid(), edictOutput).toArrayBuffer();
     const source = v.source.get(Box.from(runeId).toHexString()).pull();
@@ -241,6 +244,7 @@ export class NumberingMixin {
       outpoint,
       edictAmount,
       protocolTag,
+      savePoints,
     );
   }
   _updateForEdictHookImpl<T extends WithSourceMap>(
@@ -248,13 +252,16 @@ export class NumberingMixin {
     edictAmount: u128,
     edictOutput: u32,
     runeId: ArrayBuffer,
+    savePoints: bool = false,
   ): void {
+    if (edictOutput == v.tx.runestoneOutputIndex()) savePoints = true;
     mixin<NumberingMixin>()._updateForEdictHookImplProtocolTag<T>(
       v,
       edictAmount,
       edictOutput,
       runeId,
       u128.from(13),
+      savePoints,
     );
   }
 }
