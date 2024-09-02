@@ -42,9 +42,12 @@ export function pointsFromKeys(
     ary.reduce(
       (r: PointsReduce, v: ArrayBuffer, i: i32, ary: Array<ArrayBuffer>) => {
         console.log(
-          fromArrayBuffer(
-            r.pointer.select(v).keyword("/protocol").get(),
-          ).toString(),
+          "protocolId: " +
+            fromArrayBuffer(
+              r.pointer.select(v).keyword("/protocol").get(),
+            ).toString() +
+            "::expected protocol id:" +
+            fromArrayBuffer(r.protocolId).toString(),
         );
         if (
           isEqualArrayBuffer(
@@ -201,6 +204,7 @@ export class NumberingMixin {
   }
   _mintHook<T extends WithSourceMap>(v: T, rune: ArrayBuffer): T {
     v.source = updateSourceMapForMint(v.source, rune);
+    console.log("mint hook called");
     return v;
   }
   _fromImpl<S, T>(v: S): T {

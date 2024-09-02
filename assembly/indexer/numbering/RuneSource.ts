@@ -6,6 +6,7 @@ import {
   min,
   toArrayBuffer,
 } from "metashrew-runes/assembly/utils";
+import { console } from "metashrew-as/assembly/utils";
 
 export class RuneSource {
   public points: Array<u128>;
@@ -55,6 +56,7 @@ export class RuneSource {
     protocolTag: u128,
     amount: u128,
   ): void {
+    console.log("hooking into protoburns");
     const sourcePointer = prefix.select(source);
     const targetPointer = prefix.select(target);
     if (this.pointsSaved.has(amount.toString())) {
@@ -94,6 +96,7 @@ export class RuneSource {
       }
       this.table.set(point, target);
       const keyBytes = toArrayBuffer(point);
+      console.log("piping to protocol:" + protocolTag.toString());
       pointer.keyword("/protocol").set(toArrayBuffer(protocolTag));
       pointer.append(keyBytes);
       this.offset += valueToApply;

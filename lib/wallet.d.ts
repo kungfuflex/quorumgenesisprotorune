@@ -1,11 +1,11 @@
-export declare function encodeRuneRangeInput(outpoint: {
+export declare function encodeRuneRangeInput(outpoints: {
     tx: string;
     vout: number;
-}, runeId: {
+}[], runeId: {
     height: number;
     txindex: number;
-}): string;
-export declare function decodeRuneRangeOutput(hex: String): {
+}, protocolId?: bigint): string;
+export declare function decodeRuneRangeOutput(hex: string): {
     start: bigint;
     end: bigint;
-}[];
+}[][];

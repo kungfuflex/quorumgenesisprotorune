@@ -20,6 +20,15 @@ export interface Range {
     end: Uint8Array;
 }
 /**
+ * @generated from protobuf message quorum.RangeResult
+ */
+export interface RangeResult {
+    /**
+     * @generated from protobuf field: repeated quorum.Range ranges = 1;
+     */
+    ranges: Range[];
+}
+/**
  * @generated from protobuf message quorum.RuneRange
  */
 export interface RuneRange {
@@ -28,9 +37,9 @@ export interface RuneRange {
      */
     totalSupply: Uint8Array;
     /**
-     * @generated from protobuf field: repeated quorum.Range ranges = 2;
+     * @generated from protobuf field: repeated quorum.RangeResult ranges = 2;
      */
-    ranges: Range[];
+    ranges: RangeResult[];
 }
 /**
  * @generated from protobuf message quorum.RuneRangeInput
@@ -44,6 +53,10 @@ export interface RuneRangeInput {
      * @generated from protobuf field: protorune.RuneId rune = 2;
      */
     rune?: RuneId;
+    /**
+     * @generated from protobuf field: optional bytes protocolId = 3;
+     */
+    protocolId?: Uint8Array;
 }
 declare class Range$Type extends MessageType<Range> {
     constructor();
@@ -55,6 +68,16 @@ declare class Range$Type extends MessageType<Range> {
  * @generated MessageType for protobuf message quorum.Range
  */
 export declare const Range: Range$Type;
+declare class RangeResult$Type extends MessageType<RangeResult> {
+    constructor();
+    create(value?: PartialMessage<RangeResult>): RangeResult;
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: RangeResult): RangeResult;
+    internalBinaryWrite(message: RangeResult, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter;
+}
+/**
+ * @generated MessageType for protobuf message quorum.RangeResult
+ */
+export declare const RangeResult: RangeResult$Type;
 declare class RuneRange$Type extends MessageType<RuneRange> {
     constructor();
     create(value?: PartialMessage<RuneRange>): RuneRange;

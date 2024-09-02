@@ -61,11 +61,11 @@ const u32 = (v: number): string => {
 
 const etchRune = (kv: any, { runeId, name, premine, outpoint }: any) => {
   kv[concat(Buffer.from("/height/byruneid"), runeId.toBytes())] = u32(
-    runeId.height
+    runeId.height,
   );
   kv[concat(Buffer.from("/runeid/byetching/"), name)] = toHex(runeId.toBytes());
   kv[concat(Buffer.from("/etching/byruneid/"), runeId.toBytes())] = toHex(
-    Buffer.from(name)
+    Buffer.from(name),
   );
   kv[concat(Buffer.from("/runes/premine/"), Buffer.from(name))] =
     toHex(premine);
@@ -102,7 +102,7 @@ describe("QUORUM•GENESIS•PROTORUNE", () => {
           vout: 0,
         },
       ],
-      { height: 849236, txindex: 298 }
+      { height: 849236, txindex: 298 },
     );
     console.log(ranges);
   });
@@ -120,7 +120,7 @@ describe("QUORUM•GENESIS•PROTORUNE", () => {
       { block: 840000n, tx: 1 },
       1,
       [output, refundOutput],
-      _block
+      _block,
     );
 
     program.setBlock(block.toHex());
@@ -135,12 +135,12 @@ describe("QUORUM•GENESIS•PROTORUNE", () => {
           vout: 1,
         },
       ],
-      { height: 840000, txindex: 1 }
+      { height: 840000, txindex: 1 },
     );
     console.log(ranges);
   });
   it("should test numbering on protoburns", async () => {
-    let { block, output, refundOutput, input } =
+    let { block, output, refundOutput, input, TEST_PROTOCOL_TAG } =
       await createProtoruneFixture(false);
 
     program.setBlockHeight(840000);
@@ -157,7 +157,8 @@ describe("QUORUM•GENESIS•PROTORUNE", () => {
           vout: 1,
         },
       ],
-      { height: 840000, txindex: 1 }
+      { height: 840000, txindex: 1 },
+      TEST_PROTOCOL_TAG,
     );
   });
 });

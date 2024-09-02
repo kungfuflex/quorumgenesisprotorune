@@ -12,8 +12,7 @@ import {
 } from "./numbering";
 import { QuorumMessageContext } from "./QuorumMessageContext";
 import { Protorune } from "protorune/assembly/indexer";
-import { fieldTo } from "metashrew-runes/assembly/utils";
-import { console, encodeHexFromBuffer } from "metashrew-as/assembly/utils";
+import { u128 } from "as-bignum/assembly";
 
 function expandToNumberingAlign(
   v: Array<Protostone>,

@@ -19,36 +19,21 @@ import {
   toArrayBuffer,
 } from "metashrew-runes/assembly/utils";
 
-class PointsReduce {
-  tree: BSTU128;
-  distances: u128;
-  limit: u128;
-  constructor(tree: BSTU128, limit: u128) {
-    this.tree = tree;
-    this.distances = u128.from(0);
-    this.limit = limit;
-  }
-  static from(tree: BSTU128, limit: u128): PointsReduce {
-    return new PointsReduce(tree, limit);
-  }
-}
-
 class OutpointReduce {
   ranges: Array<quorum.RangeResult> = new Array<quorum.RangeResult>();
   rune: RuneId;
+  protocolId: u128;
 
-  constructor(rune: protorune.RuneId) {
+  constructor(rune: protorune.RuneId, protocolId: u128) {
     this.rune = new RuneId(<u64>rune.height, rune.txindex);
+    this.protocolId = protocolId;
   }
 }
 
-function range(
-  inp: quorum.RuneRangeInput,
-  _protocolId: u128 = u128.from(13),
-): ArrayBuffer {
-  const protocolId = inp.protocolId
-    ? u128.fromBytes(inp.protocolId)
-    : _protocolId;
+function range(inp: quorum.RuneRangeInput, _protocolId: u128): ArrayBuffer {
+  console.log(inp.protocolId.length.toString());
+  const protocolId =
+    inp.protocolId.length > 0 ? u128.fromBytes(inp.protocolId) : _protocolId;
   const ranges = inp.outpoints.reduce<OutpointReduce>(
     (reducer: OutpointReduce, o: protorune.Outpoint) => {
       const outpoint = OutPoint.from(
@@ -60,7 +45,7 @@ function range(
       const points = pointsFromKeys(
         reducer.rune.toBytes(),
         [outpoint.toArrayBuffer()],
-        protocolId,
+        reducer.protocolId,
       );
       if (points.length == 0) return reducer;
 
@@ -80,7 +65,7 @@ function range(
       reducer.ranges.push(allranges);
       return reducer;
     },
-    new OutpointReduce(inp.rune),
+    new OutpointReduce(inp.rune, protocolId),
   ).ranges;
 
   const result = new quorum.RuneRange();
@@ -90,5 +75,5 @@ function range(
 
 export function runerange(): ArrayBuffer {
   const inp = quorum.RuneRangeInput.decode(input().slice(4));
-  return range(inp);
+  return range(inp, u128.from("13"));
 }
