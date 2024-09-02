@@ -42,8 +42,13 @@ class OutpointReduce {
   }
 }
 
-export function runerange(): ArrayBuffer {
-  const inp = quorum.RuneRangeInput.decode(input().slice(4));
+function range(
+  inp: quorum.RuneRangeInput,
+  _protocolId: u128 = u128.from(13),
+): ArrayBuffer {
+  const protocolId = inp.protocolId
+    ? u128.fromBytes(inp.protocolId)
+    : _protocolId;
   const ranges = inp.outpoints.reduce<OutpointReduce>(
     (reducer: OutpointReduce, o: protorune.Outpoint) => {
       const outpoint = OutPoint.from(
@@ -55,7 +60,7 @@ export function runerange(): ArrayBuffer {
       const points = pointsFromKeys(
         reducer.rune.toBytes(),
         [outpoint.toArrayBuffer()],
-        u128.from(13),
+        protocolId,
       );
       if (points.length == 0) return reducer;
 
@@ -81,4 +86,9 @@ export function runerange(): ArrayBuffer {
   const result = new quorum.RuneRange();
   result.ranges = ranges;
   return result.encode();
+}
+
+export function runerange(): ArrayBuffer {
+  const inp = quorum.RuneRangeInput.decode(input().slice(4));
+  return range(inp);
 }

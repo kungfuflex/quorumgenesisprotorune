@@ -59,6 +59,10 @@ export interface RuneRangeInput {
      * @generated from protobuf field: protorune.RuneId rune = 2;
      */
     rune?: RuneId;
+    /**
+     * @generated from protobuf field: optional bytes protocolId = 3;
+     */
+    protocolId?: Uint8Array;
 }
 // @generated message type with reflection information, may provide speed optimized methods
 class Range$Type extends MessageType<Range> {
@@ -222,7 +226,8 @@ class RuneRangeInput$Type extends MessageType<RuneRangeInput> {
     constructor() {
         super("quorum.RuneRangeInput", [
             { no: 1, name: "outpoints", kind: "message", repeat: 1 /*RepeatType.PACKED*/, T: () => Outpoint },
-            { no: 2, name: "rune", kind: "message", T: () => RuneId }
+            { no: 2, name: "rune", kind: "message", T: () => RuneId },
+            { no: 3, name: "protocolId", kind: "scalar", opt: true, T: 12 /*ScalarType.BYTES*/ }
         ]);
     }
     create(value?: PartialMessage<RuneRangeInput>): RuneRangeInput {
@@ -243,6 +248,9 @@ class RuneRangeInput$Type extends MessageType<RuneRangeInput> {
                 case /* protorune.RuneId rune */ 2:
                     message.rune = RuneId.internalBinaryRead(reader, reader.uint32(), options, message.rune);
                     break;
+                case /* optional bytes protocolId */ 3:
+                    message.protocolId = reader.bytes();
+                    break;
                 default:
                     let u = options.readUnknownField;
                     if (u === "throw")
@@ -261,6 +269,9 @@ class RuneRangeInput$Type extends MessageType<RuneRangeInput> {
         /* protorune.RuneId rune = 2; */
         if (message.rune)
             RuneId.internalBinaryWrite(message.rune, writer.tag(2, WireType.LengthDelimited).fork(), options).join();
+        /* optional bytes protocolId = 3; */
+        if (message.protocolId !== undefined)
+            writer.tag(3, WireType.LengthDelimited).bytes(message.protocolId);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);

@@ -139,4 +139,25 @@ describe("QUORUM•GENESIS•PROTORUNE", () => {
     );
     console.log(ranges);
   });
+  it("should test numbering on protoburns", async () => {
+    let { block, output, refundOutput, input } =
+      await createProtoruneFixture(false);
+
+    program.setBlockHeight(840000);
+
+    program.setBlock(block.toHex());
+    await program.run("_start");
+    const ranges = await runerange(
+      program,
+      [
+        {
+          tx:
+            block.transactions?.at(block.transactions?.length - 1)?.getId() ||
+            "",
+          vout: 1,
+        },
+      ],
+      { height: 840000, txindex: 1 }
+    );
+  });
 });

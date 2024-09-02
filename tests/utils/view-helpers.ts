@@ -12,6 +12,7 @@ export const runerange = async (
     height: number;
     txindex: number;
   },
+  protocolId?: bigint,
 ): Promise<any> => {
   const cloned = program; // just mutate it
   const result = await QuorumRpc.prototype.runerange.call(
@@ -22,7 +23,7 @@ export const runerange = async (
         return readArrayBufferAsHex(cloned.memory, ptr);
       },
     },
-    { outpoints, runeId },
+    { outpoints, runeId, protocolId },
   );
   return result;
 };

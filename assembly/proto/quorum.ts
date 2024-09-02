@@ -1090,6 +1090,12 @@ export namespace quorum {
     public outpoints: Array<protorune.Outpoint> =
       new Array<protorune.Outpoint>();
     public rune: protorune.RuneId = new protorune.RuneId();
+    public protocolId: Array<u8> = new Array<u8>();
+
+    public ___protocolId: string = "";
+    public ___protocolId_index: u8 = 0;
+
+    static readonly PROTOCOL_ID_PROTOCOL_ID_INDEX: u8 = 3;
 
     // Decodes RuneRangeInput from an ArrayBuffer
     static decode(buf: ArrayBuffer): RuneRangeInput {
@@ -1134,6 +1140,12 @@ export namespace quorum {
 
             break;
           }
+          case 3: {
+            obj.protocolId = decoder.bytes();
+            obj.___protocolId = "protocolId";
+            obj.___protocolId_index = 3;
+            break;
+          }
 
           default:
             decoder.skipType(tag & 7);
@@ -1163,6 +1175,13 @@ export namespace quorum {
           size += 1 + __proto.Sizer.varint64(messageSize) + messageSize;
         }
       }
+
+      size +=
+        this.protocolId.length > 0
+          ? 1 +
+            __proto.Sizer.varint64(this.protocolId.length) +
+            this.protocolId.length
+          : 0;
 
       return size;
     }
@@ -1200,6 +1219,12 @@ export namespace quorum {
           encoder.uint32(messageSize);
           f.encodeU8Array(encoder);
         }
+      }
+
+      if (this.protocolId.length > 0) {
+        encoder.uint32(0x1a);
+        encoder.uint32(this.protocolId.length);
+        encoder.bytes(this.protocolId);
       }
 
       return buf;

@@ -6,7 +6,6 @@ import {
   min,
   toArrayBuffer,
 } from "metashrew-runes/assembly/utils";
-import { console, encodeHexFromBuffer } from "metashrew-as/assembly/utils";
 
 export class RuneSource {
   public points: Array<u128>;

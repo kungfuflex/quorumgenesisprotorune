@@ -20,4 +20,5 @@ message RuneRange {
 message RuneRangeInput {
     repeated protorune.Outpoint outpoints = 1;
     protorune.RuneId rune = 2;
+    optional bytes protocolId = 3;
 }
