@@ -24,20 +24,20 @@ export class NumberingRunestone extends RunestoneMessage {
     balanceSheet: BalanceSheet,
     edictAmount: u128,
     edictOutput: u32,
-    runeId: ArrayBuffer,
+    runeId: ArrayBuffer
   ): void {
     super.updateBalancesForEdict(
       balancesByOutput,
       balanceSheet,
       edictAmount,
       edictOutput,
-      runeId,
+      runeId
     );
     mixin<NumberingMixin>()._updateForEdictHookImpl(
       this,
       edictAmount,
       edictOutput,
-      runeId,
+      runeId
     );
   }
   mint(height: u32, balanceSheet: BalanceSheet): bool {
@@ -52,7 +52,7 @@ export class NumberingRunestone extends RunestoneMessage {
     height: u64,
     tx: u32,
     initialBalanceSheet: BalanceSheet,
-    transaction: RunesTransaction,
+    transaction: RunesTransaction
   ): bool {
     const runeId = this.buildRuneId(height, tx);
     const hasEtched = super.etch(height, tx, initialBalanceSheet, transaction);
@@ -66,7 +66,7 @@ export class NumberingRunestone extends RunestoneMessage {
           this,
           amount,
           this.unallocatedTo,
-          runeId,
+          runeId
         );
       }
     }
@@ -75,7 +75,7 @@ export class NumberingRunestone extends RunestoneMessage {
   constructor(
     fields: Map<u64, Array<u128>>,
     edicts: Array<StaticArray<u128>>,
-    defaultOutput: i32,
+    defaultOutput: i32
   ) {
     super(fields, edicts, defaultOutput);
     this.source = changetype<Map<string, RuneSource>>(0);
@@ -89,17 +89,17 @@ export class NumberingRunestone extends RunestoneMessage {
   }
   static fromProtocolMessage(
     stone: RunestoneMessage,
-    tx: RunesTransaction,
+    tx: RunesTransaction
   ): NumberingRunestone {
     return new NumberingRunestone(
       stone.fields,
       stone.edicts,
-      tx.defaultOutput(),
+      tx.defaultOutput()
     )._setTransaction(tx);
   }
   handleLeftoverRunes(
     balanceSheet: BalanceSheet,
-    balancesByOutput: Map<u32, BalanceSheet>,
+    balancesByOutput: Map<u32, BalanceSheet>
   ): void {
     super.handleLeftoverRunes(balanceSheet, balancesByOutput);
     for (let i = 0; i < balanceSheet.runes.length; i++) {
@@ -109,7 +109,7 @@ export class NumberingRunestone extends RunestoneMessage {
         this,
         amount,
         this.unallocatedTo,
-        rune,
+        rune
       );
     }
   }

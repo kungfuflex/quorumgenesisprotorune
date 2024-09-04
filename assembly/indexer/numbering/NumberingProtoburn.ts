@@ -10,15 +10,17 @@ export class NumberingProtoburn<T extends WithSourceMap> extends Protoburn {
   source: T = changetype<T>(0);
   hookBurn(rune: ArrayBuffer, amount: u128): void {
     console.log("hooking into burn");
+    console.log("burn amount: " + amount.toString());
     mixin<NumberingMixin>()._updateForProtoburn(
       this.source,
       rune,
       this.pointer,
       this.protocolTag,
-      amount,
+      amount
     );
   }
   process(balanceSheet: ProtoruneBalanceSheet, outpoint: ArrayBuffer): void {
+    console.log(balanceSheet.inspect());
     for (let i = 0; i < balanceSheet.runes.length; i++) {
       const runeId = balanceSheet.runes[i];
       const name = base.RUNE_ID_TO_ETCHING.select(runeId).get();
@@ -26,7 +28,7 @@ export class NumberingProtoburn<T extends WithSourceMap> extends Protoburn {
       this.table.ETCHING_TO_RUNE_ID.select(name).set(runeId);
       this.table.SPACERS.select(name).set(base.SPACERS.select(name).get());
       this.table.DIVISIBILITY.select(name).set(
-        base.DIVISIBILITY.select(name).get(),
+        base.DIVISIBILITY.select(name).get()
       );
       this.table.SYMBOL.select(name).set(base.SYMBOL.select(name).get());
       this.table.ETCHINGS.append(name);
@@ -36,7 +38,7 @@ export class NumberingProtoburn<T extends WithSourceMap> extends Protoburn {
   }
   static fromBurn<T extends WithSourceMap>(
     burn: Protoburn,
-    v: T,
+    v: T
   ): NumberingProtoburn<T> {
     console.log("converting burn to numberingburn");
     let numberingBurn = changetype<NumberingProtoburn<T>>(burn);

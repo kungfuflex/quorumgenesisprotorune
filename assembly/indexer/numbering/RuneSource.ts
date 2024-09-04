@@ -7,6 +7,7 @@ import {
   toArrayBuffer,
 } from "metashrew-runes/assembly/utils";
 import { console } from "metashrew-as/assembly/utils";
+import { logArray } from "../../utils";
 
 export class RuneSource {
   public points: Array<u128>;
@@ -39,7 +40,7 @@ export class RuneSource {
         r.table.set(v, new ArrayBuffer(0));
         return r;
       },
-      this,
+      this
     );
   }
   consumed(): boolean {
@@ -54,11 +55,13 @@ export class RuneSource {
     source: ArrayBuffer,
     target: ArrayBuffer,
     protocolTag: u128,
-    amount: u128,
+    amount: u128
   ): void {
     console.log("hooking into protoburns");
     const sourcePointer = prefix.select(source);
     const targetPointer = prefix.select(target);
+    logArray(this.pointsSaved.keys());
+    console.log(amount.toString());
     if (this.pointsSaved.has(amount.toString())) {
       const _points = this.pointsSaved.get(amount.toString());
       if (_points.length > 0) {
@@ -82,9 +85,10 @@ export class RuneSource {
     target: ArrayBuffer,
     value: u128,
     protocolTag: u128,
-    savePoints: bool,
+    savePoints: bool
   ): u128 {
-    let remaining = value;
+    let remaining = u128.fromU128(value);
+    console.log("amount:" + remaining.toString());
     const pointer = prefix.select(target);
     const points = new Array<u128>();
     while (!this.consumed()) {

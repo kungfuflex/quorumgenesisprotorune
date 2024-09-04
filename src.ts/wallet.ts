@@ -1,5 +1,6 @@
 import { decodeRunes } from "metashrew-runes/lib/src.ts/outpoint";
 import { RuneRangeInput, RuneRange } from "./proto/quorum";
+import { u128 } from "@magiceden-oss/runestone-lib/dist/src/integer";
 import { stripHexPrefix } from "protorune/lib/src.ts/utils";
 
 function numberToBytes(num: bigint): Uint8Array {
@@ -19,7 +20,7 @@ export function encodeRuneRangeInput(
       vout: outpoint.vout,
     })),
     rune: runeId,
-    protocolId: Buffer.from(protocolId.toString(16), "hex"),
+    protocolId: Buffer.from(protocolId.toString(), "utf-8"),
   };
   return "0x" + Buffer.from(RuneRangeInput.toBinary(input)).toString("hex");
 }

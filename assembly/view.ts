@@ -31,9 +31,12 @@ class OutpointReduce {
 }
 
 function range(inp: quorum.RuneRangeInput, _protocolId: u128): ArrayBuffer {
-  console.log(inp.protocolId.length.toString());
   const protocolId =
-    inp.protocolId.length > 0 ? u128.fromBytes(inp.protocolId) : _protocolId;
+    inp.protocolId.length > 0
+      ? u128.from(
+          String.UTF8.decode(changetype<Uint8Array>(inp.protocolId).buffer),
+        )
+      : _protocolId;
   const ranges = inp.outpoints.reduce<OutpointReduce>(
     (reducer: OutpointReduce, o: protorune.Outpoint) => {
       const outpoint = OutPoint.from(
